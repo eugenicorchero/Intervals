@@ -64,7 +64,6 @@ footer{margin-top:30px; text-align:center; color:var(--muted); font-size:0.85rem
 
 <script src="https://unpkg.com/vexflow/build/cjs/vexflow.js"></script>
 <script>
-// ==== CONFIGURACIÓ ====
 const VF = Vex.Flow;
 const MIN_MIDI = 57, MAX_MIDI = 79, START_TIME = 20;
 const INTERVALS = [
@@ -86,31 +85,28 @@ const BASE_NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 
 let state = {lastPairs:[], midiA:null, midiB:null, noteA:null, noteB:null, currentSemitones:null, currentDir:null, attempts:0, correct:0, timer:null, startTime:null, renderer:null, context:null};
 
-// === UTILS ===
 function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+
 function buildIntervalOptions(){
   const sel=document.getElementById('intervalSelect'); sel.innerHTML='';
   INTERVALS.forEach(i=>{
     const opt=document.createElement('option');
     opt.value=i.semitones;
-    opt.textContent=`${i.name} (${i.tones} to)`;
+    opt.textContent=`${i.name} (${i.tones} to)`; 
     sel.appendChild(opt);
   });
 }
 
-// === GENERACIÓ DE NOTES ===
 function generarNotaAleatoria(minMidi=MIN_MIDI,maxMidi=MAX_MIDI){
   let midi = randInt(minMidi,maxMidi);
   let accidental = null;
   const r = Math.random();
   if(r<0.15) accidental='#';
   else if(r<0.3) accidental='b';
-
   const octave = Math.floor(midi/12) -1;
   const noteIndex = midi%12;
   const noteBase = BASE_NOTES[noteIndex].replace('#','');
   let noteName = noteBase+'/'+octave;
-
   return {midi, noteName, accidental};
 }
 
@@ -125,44 +121,35 @@ function generateInterval(){
     pair=[n1,n2];
     attempts++;
   }while(state.lastPairs.includes(pair.map(n=>n.midi).join(',')) && attempts<50);
-
   state.lastPairs.push(pair.map(n=>n.midi).join(','));
   if(state.lastPairs.length>10) state.lastPairs.shift();
-
   const dir = pair[1].midi>pair[0].midi?'asc':(pair[1].midi<pair[0].midi?'desc':'asc');
   const semitones=Math.abs(pair[1].midi-pair[0].midi);
   const intervalObj = INTERVALS.find(i=>i.semitones===semitones);
-
   state.midiA=pair[0].midi; state.midiB=pair[1].midi;
   state.noteA=pair[0]; state.noteB=pair[1];
   state.currentSemitones=semitones; state.currentDir=dir;
-
   return {noteA:pair[0],noteB:pair[1],semitones,dir,intervalName:intervalObj.name};
 }
 
-// === RENDER INTERVAL ===
 function renderInterval(interval){
   const vfContainer=document.getElementById('vf-container'); vfContainer.innerHTML='';
   state.renderer=new VF.Renderer(vfContainer,VF.Renderer.Backends.SVG);
   state.renderer.resize(600,180);
   state.context=state.renderer.getContext();
-
   const stave=new VF.Stave(10,40,580);
   stave.addClef('treble').setContext(state.context).draw();
-
   const notes=[interval.noteA,interval.noteB].map(nObj=>{
     const n=new VF.StaveNote({clef:'treble', keys:[nObj.noteName], duration:'q'});
     if(nObj.accidental) n.addAccidental(0,new VF.Accidental(nObj.accidental));
     return n;
   });
-
   const voice=new VF.Voice({num_beats:2, beat_value:4});
   voice.addTickables(notes);
   new VF.Formatter().joinVoices([voice]).format([voice],500);
   voice.draw(state.context,stave);
 }
 
-// === TIMER ===
 function updateTimerDisplay(rem){
   const el=document.getElementById('timer');
   el.textContent=rem+'s';
@@ -181,7 +168,6 @@ function startTimer(){
 
 function clearTimer(){if(state.timer){clearInterval(state.timer);state.timer=null;}}
 
-// === LÒGICA APP ===
 function loadQuestion(){
   clearTimer();
   const interval=generateInterval();
@@ -231,14 +217,15 @@ function onTimeUp(){
   setTimeout(loadQuestion,1500);
 }
 
-// === EVENTS ===
-buildIntervalOptions();
-document.getElementById('confirmBtn').addEventListener('click',()=>evaluateAnswer());
-document.getElementById('nextBtn').addEventListener('click',()=>loadQuestion());
-document.getElementById('startBtn').addEventListener('click',()=>{
-  loadQuestion();
-  document.getElementById('startBtn').classList.add('disabled');
-  document.getElementById('startBtn').disabled=true;
+document.addEventListener('DOMContentLoaded', () => {
+  buildIntervalOptions();
+  document.getElementById('confirmBtn').addEventListener('click',()=>evaluateAnswer());
+  document.getElementById('nextBtn').addEventListener('click',()=>loadQuestion());
+  document.getElementById('startBtn').addEventListener('click',()=>{
+    loadQuestion();
+    document.getElementById('startBtn').classList.add('disabled');
+    document.getElementById('startBtn').disabled=true;
+  });
 });
 </script>
 </body>
