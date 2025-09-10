@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Entrenador de Intervalos</title>
+<style>
+:root{
+  --primary:#1e3a8a; --primary-light:#3b82f6; --bg:#f0f4ff; --card:#ffffff;
+  --success:#10b981; --danger:#ef4444; --muted:#4b5563;
+  font-family:'Inter',sans-serif;
+}
+body{margin:0; background:var(--bg); color:#111827; overflow-x:hidden;}
+.wrap{max-width:900px; margin:20px auto; padding:20px;}
+.card{background:var(--card); border-radius:16px; padding:25px; box-shadow:0 15px 40px rgba(0,0,0,0.08);}
+h1{margin:0 0 10px 0; color:var(--primary); font-size:1.8rem;}
+#vf-container{border-radius:12px; padding:12px; min-height:180px; background:white; display:flex; align-items:center; justify-content:center;}
+.controls{margin-top:16px; display:flex; flex-wrap:wrap; gap:12px; align-items:center;}
+select, button{padding:10px 16px; border-radius:10px; border:1px solid rgba(30,58,138,0.3); font-size:1rem;}
+button.primary{background:var(--primary); color:#fff; border:none; cursor:pointer;}
+button.primary:hover{background:var(--primary-light);}
+button.ghost{background:transparent; border:1px solid rgba(30,58,138,0.3); color:var(--primary); cursor:pointer;}
+button.ghost:hover{background:rgba(59,130,246,0.1);}
+.badge{padding:5px 10px; border-radius:12px; background:rgba(30,58,138,0.1); color:var(--primary);}
+.message{margin-top:12px; padding:12px; border-radius:12px; display:none; font-weight:700; opacity:0; transition: opacity 0.3s;}
+.ok{background:#d1fae5; color:var(--success);}
+.bad{background:#fee2e2; color:var(--danger);}
+.meta{display:flex; gap:16px; margin-top:14px; flex-wrap:wrap; font-size:0.95rem; color:var(--muted);}
+@media(max-width:750px){.controls{flex-direction:column;}}
+/* Modal inicial ajustado para móviles */
+#modal-overlay{
+  position:absolute; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:9999;
+}
+#modal{background:white; border-radius:16px; padding:25px; max-width:90%; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.2);}
+#modal button{margin-top:15px;}
+</style>
+</head>
+<body>
+
+<div id="modal-overlay">
+  <div id="modal">
+    <h2>Bienvenido al Entrenador de Intervalos</h2>
+    <p>Reglas:</p>
+    <ul style="text-align:left;">
+      <li>Se mostrarán dos notas en un pentagrama.</li>
+      <li>Selecciona el intervalo correcto y su dirección (ascendente/descendente).</li>
+      <li>Tienes 20 segundos por ejercicio.</li>
+      <li>Practica infinitamente y mejora tu reconocimiento de intervalos.</li>
+    </ul>
+    <button id="startBtn" class="primary">Aceptar y comenzar</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="card">
+    <h1>Entrenador de Intervalos Musical</h1>
+    <div id="vf-container"></div>
+
+    <div class="controls">
+      <select id="intervalSelect"></select>
+      <select id="dirSelect">
+        <option value="asc">Ascendente</option>
+        <option value="desc">Descendente</option>
+      </select>
+      <button id="confirmBtn" class="primary">Confirmar</button>
+      <button id="nextBtn" class="ghost">Siguiente</button>
+      <div style="margin-left:auto;">Tiempo: <span id="timer" class="badge">20s</span></div>
+    </div>
+
+    <div class="message" id="message"></div>
+
+    <div class="meta">
+      Intentos: <span id="attempts" class="badge">0</span>
+      Aciertos: <span id="correct" class="badge">0</span>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/vexflow/build/cjs/vexflow.js"></script>
+<script>
+const VF = Vex.Flow;
+const MIN_MIDI=57, MAX_MIDI=79, START_TIME=20;
+const INTERVALS={0:'Unísono',1:'2ª menor',2:'2ª mayor',3:'3ª menor',4:'3ª mayor',5:'4ª justa',6:'Tritono',7:'5ª justa',8:'6ª menor',9:'6ª mayor',10:'7ª menor',11:'7ª mayor',12:'Octava'};
+
+let state={midiA:null,midiB:null,attempts:0,correct:0,timer:null,startTime:null};
+
+// Renderer y stave único
+const vfContainer=document.getElementById('vf-container');
+const renderer=new VF.Renderer(vfContainer,VF.Renderer.Backends.SVG);
+renderer.resize(600,180);
+const context=renderer.getContext();
+context.fillStyle='white';
+context.fillRect(0,0,600,180);
+const stave=new VF.Stave(10,40,580);
+stave.addClef('treble').setContext(context).draw();
+
+let lastNotes=[];
+function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function randomMidi(){ return randInt(MIN_MIDI,MAX_MIDI); }
+function midiToNote(midi){
+  const notes=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  let pc=midi%12,octave=Math.floor(midi/12)-1,name=notes[pc];
+  if(['C#','D#','F#','G#','A#'].includes(name)) name=Math.random()<0.5?name:name[0]+'b';
+  return name+'/'+octave;
+}
+
+function renderNotes(a,b){
+  lastNotes.forEach(n=>n.elem.remove());
+  lastNotes=[];
+  context.clearRect(0,0,600,180);
+  context.fillStyle='white';
+  context.fillRect(0,0,600,180);
+  stave.setContext(context).draw();
+
+  const noteA=new VF.StaveNote({clef:'treble', keys:[midiToNote(a)], duration:'q'});
+  const noteB=new VF.StaveNote({clef:'treble', keys:[midiToNote(b)], duration:'q'});
+  [noteA,noteB].forEach(n=>{
+    const k=n.keys[0];
+    if(k.includes('#')) n.addModifier(0,new VF.Accidental('#'));
+    else if(k.includes('b')) n.addModifier(0,new VF.Accidental('b'));
+  });
+  const voice=new VF.Voice({num_beats:2, beat_value:4});
+  voice.addTickables([noteA,noteB]);
+  new VF.Formatter().joinVoices([voice]).format([voice],500);
+  voice.draw(context,stave);
+  lastNotes=[noteA,noteB];
+}
+
+function buildIntervalOptions(){
+  const sel=document.getElementById('intervalSelect');
+  sel.innerHTML='';
+  for(let s=0;s<=12;s++){
+    const opt=document.createElement('option');
+    opt.value=s; opt.textContent=`${INTERVALS[s]} (${s} semit.)`;
+    sel.appendChild(opt);
+  }
+}
+
+function pickPair(){ 
+  let a=randomMidi();
+  let offset=randInt(0,12);
+  let dir=Math.random()<0.5?-1:1;
+  let b=Math.min(MAX_MIDI,Math.max(MIN_MIDI,a+offset*dir));
+  return [a,b];
+}
+
+function loadQuestion(autoStart=true){
+  clearTimer();
+  const [a,b]=pickPair();
+  state.midiA=a; state.midiB=b;
+  renderNotes(a,b);
+  document.getElementById('message').style.display='none';
+  document.getElementById('intervalSelect').selectedIndex=0;
+  document.getElementById('dirSelect').value='asc';
+  state.startTime=null;
+  updateTimerDisplay(START_TIME);
+  if(autoStart) startTimer();
+}
+
+function updateTimerDisplay(rem){
+  const el=document.getElementById('timer');
+  el.textContent=rem+'s';
+  el.style.background=rem<=5?'#fee2e2':'';
+}
+function startTimer(){
+  clearTimer(); state.startTime=Date.now();
+  state.timer=setInterval(()=>{
+    const rem=Math.max(0,START_TIME-Math.floor((Date.now()-state.startTime)/1000));
+    updateTimerDisplay(rem);
+    if(rem<=0){ clearTimer(); onTimeUp(); }
+  },100);
+}
+function clearTimer(){ if(state.timer){clearInterval(state.timer); state.timer=null;} }
+
+function evaluateAnswer(){
+  clearTimer();
+  const selS=parseInt(document.getElementById('intervalSelect').value,10);
+  const selDir=document.getElementById('dirSelect').value;
+  const diff=state.midiB-state.midiA;
+  const semAbs=Math.abs(diff);
+  const dir=diff>0?'asc':(diff<0?'desc':'asc');
+  state.attempts++; document.getElementById('attempts').textContent=state.attempts;
+  const correctSem=selS===semAbs;
+  const correctDir=semAbs===0?true:selDir===dir;
+  const btn=document.getElementById('confirmBtn');
+  if(correctSem && correctDir){
+    state.correct++; document.getElementById('correct').textContent=state.correct;
+    showMessage('¡Correcto!', true);
+    btn.style.background='var(--success)';
+    setTimeout(()=>{btn.style.background='var(--primary)'; loadQuestion(true);},600);
+  } else {
+    showMessage(`Incorrecto. Correcto: ${INTERVALS[semAbs]} (${semAbs} semit.), ${dir==='asc'?'ascendente':'descendente'}`, false);
+    btn.style.background='var(--danger)';
+    setTimeout(()=>{btn.style.background='var(--primary)';},600);
+  }
+}
+
+function onTimeUp(){
+  const diff=state.midiB-state.midiA;
+  const semAbs=Math.abs(diff);
+  const dir=diff>0?'asc':(diff<0?'desc':'asc');
+  state.attempts++; document.getElementById('attempts').textContent=state.attempts;
+  showMessage(`Se acabó el tiempo. Correcto: ${INTERVALS[semAbs]} (${semAbs} semit.), ${dir==='asc'?'ascendente':'descendente'}`, false);
+}
+
+function showMessage(txt,ok=true){
+  const el=document.getElementById('message');
+  el.textContent=txt;
+  el.className='message '+(ok?'ok':'bad');
+  el.style.display='block';
+  setTimeout(()=>{el.style.opacity=1;},50);
+  setTimeout(()=>{el.style.opacity=0; setTimeout(()=>el.style.display='none',500);},2500);
+}
+
+document.getElementById('confirmBtn').addEventListener('click',()=>evaluateAnswer());
+document.getElementById('nextBtn').addEventListener('click',()=>loadQuestion(true));
+
+// Modal inicial robusto
+const startBtn=document.getElementById('startBtn');
+function startApp(e){e.preventDefault(); e.stopPropagation(); document.getElementById('modal-overlay').style.display='none'; buildIntervalOptions(); setTimeout(()=>loadQuestion(true),0);}
+startBtn.addEventListener('click',startApp);
+startBtn.addEventListener('touchend',startApp);
+</script>
+
+</body>
+</html>
