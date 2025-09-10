@@ -78,21 +78,21 @@ const INTERVALS = [
   {semitones:12,name:'Octava',tones:'6'}
 ];
 
-let state = {midiA:null,midiB:null,attempts:0,correct:0,timer:null,startTime:null,renderer:null,context:null,stave:null,voice:null,lastPairs:[]};
+let state = {midiA:null,midiB:null,attempts:0,correct:0,timer:null,startTime:null,renderer:null,context:null,lastPairs:[]};
 
 function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function randomMidi(){return randInt(MIN_MIDI,MAX_MIDI);}
 
-// Generar nota con sostenido/bemol aleatorio
-function midiToNote(m){
+function midiToNoteAccidental(m){
   const notes=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
   let pc=m%12,oct=Math.floor(m/12)-1,n=notes[pc];
-  if(['C#','D#','F#','G#','A#'].includes(n)) n=Math.random()<0.5?n:n[0]+'b';
-  else if(Math.random()<0.15) n=n[0]+'#'; else if(Math.random()<0.15) n=n[0]+'b';
-  return n+'/'+oct;
+  let accidental=null;
+  let r=Math.random();
+  if(r<0.15){ n=n[0]+'#'; accidental='#';}
+  else if(r<0.3){ n=n[0]+'b'; accidental='b';}
+  return {note:n+'/'+oct, accidental:accidental};
 }
 
-// Menu desplegable
 function buildIntervalOptions(){
   const sel=document.getElementById('intervalSelect'); sel.innerHTML='';
   INTERVALS.forEach(i=>{
@@ -103,14 +103,13 @@ function buildIntervalOptions(){
   });
 }
 
-// Elegir par de notas coherente, con sostenidos/bemoles y aleatorio
 function pickPair(){
-  let attempts=0, pair;
+  let attempts=0,pair;
   do{
-    let midiA = randomMidi();
-    let semitones = randInt(0,12);
-    let dir = Math.random()<0.5?1:-1;
-    let midiB = midiA + semitones*dir;
+    let midiA=randomMidi();
+    let semitones=randInt(0,12);
+    let dir=Math.random()<0.5?1:-1;
+    let midiB=midiA+semitones*dir;
     if(midiB<MIN_MIDI) midiB=MIN_MIDI;
     if(midiB>MAX_MIDI) midiB=MAX_MIDI;
     pair=[midiA,midiB];
@@ -121,36 +120,38 @@ function pickPair(){
   return pair;
 }
 
-// Renderer y pentagrama
 function initRenderer(){
-  const vfContainer = document.getElementById('vf-container');
+  const vfContainer=document.getElementById('vf-container');
   vfContainer.innerHTML='';
-  state.renderer = new VF.Renderer(vfContainer, VF.Renderer.Backends.SVG);
+  state.renderer=new VF.Renderer(vfContainer,VF.Renderer.Backends.SVG);
   state.renderer.resize(600,180);
-  state.context = state.renderer.getContext();
-  state.stave = new VF.Stave(10,40,580);
-  state.stave.addClef('treble').setContext(state.context).draw();
+  state.context=state.renderer.getContext();
+  const stave=new VF.Stave(10,40,580);
+  stave.addClef('treble').setContext(state.context).draw();
 }
 
-// Renderizar notas
 function renderNotes(a,b){
-  if(state.voice) state.voice=null;
-  const noteA=new VF.StaveNote({clef:'treble', keys:[midiToNote(a)], duration:'q'});
-  const noteB=new VF.StaveNote({clef:'treble', keys:[midiToNote(b)], duration:'q'});
-  [noteA,noteB].forEach(n=>{
-    const k=n.keys[0]; 
-    if(k.includes('#')) n.addModifier(0,new VF.Accidental('#')); 
-    else if(k.includes('b')) n.addModifier(0,new VF.Accidental('b'));
+  const vfContainer=document.getElementById('vf-container');
+  vfContainer.innerHTML=''; // Limpia completamente antes de render
+  state.renderer=new VF.Renderer(vfContainer,VF.Renderer.Backends.SVG);
+  state.renderer.resize(600,180);
+  state.context=state.renderer.getContext();
+  const stave=new VF.Stave(10,40,580);
+  stave.addClef('treble').setContext(state.context).draw();
+
+  const notes=[a,b].map(m=>{
+    const nObj=midiToNoteAccidental(m);
+    const n=new VF.StaveNote({clef:'treble', keys:[nObj.note], duration:'q'});
+    if(nObj.accidental) n.addModifier(0,new VF.Accidental(nObj.accidental));
+    return n;
   });
-  state.voice = new VF.Voice({num_beats:2, beat_value:4});
-  state.voice.addTickables([noteA,noteB]);
-  state.context.clear();
-  state.stave.setContext(state.context).draw();
-  new VF.Formatter().joinVoices([state.voice]).format([state.voice],500);
-  state.voice.draw(state.context,state.stave);
+
+  const voice=new VF.Voice({num_beats:2, beat_value:4});
+  voice.addTickables(notes);
+  new VF.Formatter().joinVoices([voice]).format([voice],500);
+  voice.draw(state.context,stave);
 }
 
-// Cargar ejercicio
 function loadQuestion(){
   clearTimer();
   const [a,b]=pickPair(); state.midiA=a; state.midiB=b;
@@ -161,7 +162,6 @@ function loadQuestion(){
   state.startTime=Date.now(); updateTimerDisplay(START_TIME); startTimer();
 }
 
-// Timer
 function updateTimerDisplay(rem){const el=document.getElementById('timer'); el.textContent=rem+'s'; el.style.background=rem<=5?'#fee2e2':'';}
 function startTimer(){clearTimer(); state.timer=setInterval(()=>{
   const rem=Math.max(0,START_TIME-Math.floor((Date.now()-state.startTime)/1000));
@@ -170,7 +170,6 @@ function startTimer(){clearTimer(); state.timer=setInterval(()=>{
 },100);}
 function clearTimer(){if(state.timer){clearInterval(state.timer);state.timer=null;}}
 
-// Evaluar respuesta
 function evaluateAnswer(){
   clearTimer();
   const selS=parseInt(document.getElementById('intervalSelect').value,10);
@@ -188,7 +187,6 @@ function evaluateAnswer(){
     btn.style.background='var(--danger)'; setTimeout(()=>{btn.style.background='var(--primary)';},600);}
 }
 
-// Tiempo agotado
 function onTimeUp(){
   const diff=state.midiB-state.midiA; const semAbs=Math.abs(diff); const dir=diff>0?'asc':(diff<0?'desc':'asc');
   state.attempts++; document.getElementById('attempts').textContent=state.attempts;
@@ -196,7 +194,6 @@ function onTimeUp(){
   setTimeout(loadQuestion,1500);
 }
 
-// Mostrar mensaje
 function showMessage(txt,ok=true){
   const el=document.getElementById('message'); el.textContent=txt; el.className='message '+(ok?'ok':'bad'); el.style.display='block';
   setTimeout(()=>{el.style.opacity=1;},50);
@@ -207,13 +204,10 @@ buildIntervalOptions();
 document.getElementById('confirmBtn').addEventListener('click',()=>evaluateAnswer());
 document.getElementById('nextBtn').addEventListener('click',()=>loadQuestion());
 
-// START BUTTON
-const startBtn=document.getElementById('startBtn');
-startBtn.addEventListener('click',()=>{
-  initRenderer();
+document.getElementById('startBtn').addEventListener('click',()=>{
   loadQuestion();
-  startBtn.classList.add('disabled');
-  startBtn.disabled=true;
+  document.getElementById('startBtn').classList.add('disabled'); 
+  document.getElementById('startBtn').disabled=true;
 });
 </script>
 </body>
