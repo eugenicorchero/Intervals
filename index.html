@@ -84,20 +84,8 @@ button.ghost:hover{background:rgba(59,130,246,0.1);}
 const VF = Vex.Flow;
 const MIN_MIDI=57, MAX_MIDI=79, START_TIME=20;
 const INTERVALS={0:'Unísono',1:'2ª menor',2:'2ª mayor',3:'3ª menor',4:'3ª mayor',5:'4ª justa',6:'Tritono',7:'5ª justa',8:'6ª menor',9:'6ª mayor',10:'7ª menor',11:'7ª mayor',12:'Octava'};
-let state={midiA:null,midiB:null,attempts:0,correct:0,timer:null,startTime:null};
+let state={midiA:null,midiB:null,attempts:0,correct:0,timer:null,startTime:null,renderer:null,context:null,stave:null};
 
-// Renderer y grupo SVG para notas
-const vfContainer=document.getElementById('vf-container');
-const renderer=new VF.Renderer(vfContainer,VF.Renderer.Backends.SVG);
-renderer.resize(600,180);
-const context=renderer.getContext();
-const stave=new VF.Stave(10,40,580);
-stave.addClef('treble').setContext(context).draw();
-
-// Grupo para notas
-const notesGroup=context.openGroup();
-
-// Auxiliares
 function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
 function randomMidi(){ return randInt(MIN_MIDI,MAX_MIDI); }
 function midiToNote(midi){
@@ -107,23 +95,6 @@ function midiToNote(midi){
   return name+'/'+octave;
 }
 
-// Renderizar notas limpiando grupo
-function renderNotes(a,b){
-  notesGroup.clear(); // limpia notas previas
-  const noteA=new VF.StaveNote({clef:'treble', keys:[midiToNote(a)], duration:'q'});
-  const noteB=new VF.StaveNote({clef:'treble', keys:[midiToNote(b)], duration:'q'});
-  [noteA,noteB].forEach(n=>{
-    const k=n.keys[0];
-    if(k.includes('#')) n.addModifier(0,new VF.Accidental('#'));
-    else if(k.includes('b')) n.addModifier(0,new VF.Accidental('b'));
-  });
-  const voice=new VF.Voice({num_beats:2, beat_value:4});
-  voice.addTickables([noteA,noteB]);
-  new VF.Formatter().joinVoices([voice]).format([voice],500);
-  voice.draw(context,stave);
-}
-
-// UI intervalos
 function buildIntervalOptions(){
   const sel=document.getElementById('intervalSelect');
   sel.innerHTML='';
@@ -134,13 +105,40 @@ function buildIntervalOptions(){
   }
 }
 
-// Par coherente
 function pickPair(){ 
   let a=randomMidi();
   let offset=randInt(0,12);
   let dir=Math.random()<0.5?-1:1;
   let b=Math.min(MAX_MIDI,Math.max(MIN_MIDI,a+offset*dir));
   return [a,b];
+}
+
+// Inicializa VexFlow tras cerrar popup
+function initRenderer(){
+  const vfContainer=document.getElementById('vf-container');
+  vfContainer.innerHTML='';
+  state.renderer=new VF.Renderer(vfContainer,VF.Renderer.Backends.SVG);
+  state.renderer.resize(600,180);
+  state.context=state.renderer.getContext();
+  state.stave=new VF.Stave(10,40,580);
+  state.stave.addClef('treble').setContext(state.context).draw();
+}
+
+// Renderizar notas limpiamente
+function renderNotes(a,b){
+  state.context.clear();
+  state.stave.setContext(state.context).draw();
+  const noteA=new VF.StaveNote({clef:'treble', keys:[midiToNote(a)], duration:'q'});
+  const noteB=new VF.StaveNote({clef:'treble', keys:[midiToNote(b)], duration:'q'});
+  [noteA,noteB].forEach(n=>{
+    const k=n.keys[0];
+    if(k.includes('#')) n.addModifier(0,new VF.Accidental('#'));
+    else if(k.includes('b')) n.addModifier(0,new VF.Accidental('b'));
+  });
+  const voice=new VF.Voice({num_beats:2, beat_value:4});
+  voice.addTickables([noteA,noteB]);
+  new VF.Formatter().joinVoices([voice]).format([voice],500);
+  voice.draw(state.context,state.stave);
 }
 
 // Pregunta infinita
@@ -224,9 +222,16 @@ buildIntervalOptions();
 
 // POPUP
 const popup=document.getElementById('popup-overlay');
-document.querySelector('#popup .close').addEventListener('click',()=>{popup.style.display='none'; loadQuestion();});
-document.getElementById('startBtn').addEventListener('click',()=>{popup.style.display='none'; loadQuestion();});
-
+document.querySelector('#popup .close').addEventListener('click',()=>{
+  popup.style.display='none';
+  initRenderer();
+  loadQuestion();
+});
+document.getElementById('startBtn').addEventListener('click',()=>{
+  popup.style.display='none';
+  initRenderer();
+  loadQuestion();
+});
 </script>
 </body>
 </html>
