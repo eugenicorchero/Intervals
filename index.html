@@ -1,33 +1,33 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="ca">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Entrenador de Intervalos Musical</title>
+<title>Entrenador d’Intervals Musicals</title>
 <style>
 :root{
-  --primary:#1e3a8a; --primary-light:#3b82f6; --bg:#f0f4ff; --card:#ffffff;
-  --success:#10b981; --danger:#ef4444; --muted:#4b5563;
-  font-family:'Inter',sans-serif;
+  --bg:#1C1C1E; --card:#2C2C2E; --text:#FFFFFF; --text-muted:#A1A1AA;
+  --primary:#0A84FF; --primary-hover:#339CFF;
+  --success:#30D158; --danger:#FF453A; --alert:#FF9F0A;
 }
-body{margin:0; background:var(--bg); color:#111827;}
+body{margin:0; background:var(--bg); color:var(--text); font-family:'Inter',sans-serif;}
 .wrap{max-width:900px; margin:20px auto; padding:20px;}
-.card{background:var(--card); border-radius:16px; padding:25px; box-shadow:0 15px 40px rgba(0,0,0,0.08);}
-h1{margin:0 0 10px 0; color:var(--primary); font-size:1.8rem;}
-.lead{color:var(--muted); margin:0 0 20px 0; font-size:1rem;}
-#vf-container{border-radius:12px; padding:12px; min-height:180px; background:#fff; display:flex; align-items:center; justify-content:center;}
-.controls{margin-top:16px; display:flex; flex-wrap:wrap; gap:12px; align-items:center;}
-select, button{padding:10px 16px; border-radius:10px; border:1px solid rgba(30,58,138,0.3); font-size:1rem;}
-button.primary{background:var(--primary); color:#fff; border:none; cursor:pointer;}
-button.primary:hover{background:var(--primary-light);}
+.card{background:var(--card); border-radius:20px; padding:30px; box-shadow:0 15px 40px rgba(0,0,0,0.5);}
+h1{margin:0 0 10px 0; color:var(--primary); font-size:1.9rem;}
+.lead{color:var(--text-muted); margin:0 0 20px 0; font-size:1rem;}
+#vf-container{border-radius:12px; padding:12px; min-height:180px; background:#fff; display:flex; align-items:center; justify-content:center; margin-bottom:20px;}
+.controls{display:flex; flex-wrap:wrap; gap:12px; align-items:center;}
+select, button{padding:10px 16px; border-radius:12px; font-size:1rem; border:none;}
+button.primary{background:var(--primary); color:#fff; cursor:pointer; transition:0.2s;}
+button.primary:hover{background:var(--primary-hover);}
 button.primary.disabled{opacity:0.5; cursor:not-allowed;}
-button.ghost{background:transparent; border:1px solid rgba(30,58,138,0.3); color:var(--primary); cursor:pointer;}
-button.ghost:hover{background:rgba(59,130,246,0.1);}
-.badge{padding:5px 10px; border-radius:12px; background:rgba(30,58,138,0.1); color:var(--primary);}
+button.ghost{background:transparent; border:1px solid var(--primary); color:var(--primary); cursor:pointer; transition:0.2s;}
+button.ghost:hover{background:rgba(10,132,255,0.1);}
+.badge{padding:5px 10px; border-radius:12px; background:rgba(255,255,255,0.1); color:var(--text);}
 .message{margin-top:12px; padding:12px; border-radius:12px; display:none; font-weight:700; opacity:0; transition: opacity 0.3s;}
-.ok{background:#d1fae5; color:var(--success);}
-.bad{background:#fee2e2; color:var(--danger);}
-.meta{display:flex; gap:16px; margin-top:14px; flex-wrap:wrap; font-size:0.95rem; color:var(--muted);}
+.ok{background:#274C1B; color:var(--success);}
+.bad{background:#541010; color:var(--danger);}
+.meta{display:flex; gap:16px; margin-top:14px; flex-wrap:wrap; font-size:0.95rem; color:var(--text-muted);}
 #startBtn{font-size:1.2rem; padding:14px 24px; margin-bottom:12px;}
 @media(max-width:750px){.controls{flex-direction:column;}}
 </style>
@@ -36,24 +36,24 @@ button.ghost:hover{background:rgba(59,130,246,0.1);}
 
 <div class="wrap">
   <div class="card">
-    <h1>Entrenador de Intervalos Musical</h1>
-    <p class="lead">Rango A3 → G5. Sostenidos/bemoles aleatorios. ¡Practica infinitamente!</p>
-    <button id="startBtn" class="primary">Iniciar Ejercicio</button>
+    <h1>Entrenador d’Intervals Musicals</h1>
+    <p class="lead">Rango A3 → G5. Sostenidors i bemolls aleatoris. Practica infinitament!</p>
+    <button id="startBtn" class="primary">Inicia Exercici</button>
     <div id="vf-container"></div>
     <div class="controls">
       <select id="intervalSelect"></select>
       <select id="dirSelect">
-        <option value="asc">Ascendente</option>
-        <option value="desc">Descendente</option>
+        <option value="asc">Ascendent</option>
+        <option value="desc">Descendent</option>
       </select>
-      <button id="confirmBtn" class="primary">Confirmar</button>
-      <button id="nextBtn" class="ghost">Siguiente</button>
-      <div style="margin-left:auto;">Tiempo: <span id="timer" class="badge">20s</span></div>
+      <button id="confirmBtn" class="primary">Confirma</button>
+      <button id="nextBtn" class="ghost">Següent</button>
+      <div style="margin-left:auto;">Temps: <span id="timer" class="badge">20s</span></div>
     </div>
     <div class="message" id="message"></div>
     <div class="meta">
-      Intentos: <span id="attempts" class="badge">0</span>
-      Aciertos: <span id="correct" class="badge">0</span>
+      Intents: <span id="attempts" class="badge">0</span>
+      Encerts: <span id="correct" class="badge">0</span>
     </div>
   </div>
 </div>
@@ -63,18 +63,18 @@ button.ghost:hover{background:rgba(59,130,246,0.1);}
 const VF = Vex.Flow;
 const MIN_MIDI = 57, MAX_MIDI = 79, START_TIME = 20;
 const INTERVALS = [
-  {semitones:0,name:'Unísono',tones:'0'},
-  {semitones:1,name:'2ª menor',tones:'½'},
-  {semitones:2,name:'2ª mayor',tones:'1'},
-  {semitones:3,name:'3ª menor',tones:'1½'},
-  {semitones:4,name:'3ª mayor',tones:'2'},
-  {semitones:5,name:'4ª justa',tones:'2½'},
-  {semitones:6,name:'Tritono',tones:'3'},
-  {semitones:7,name:'5ª justa',tones:'3½'},
-  {semitones:8,name:'6ª menor',tones:'4'},
-  {semitones:9,name:'6ª mayor',tones:'4½'},
-  {semitones:10,name:'7ª menor',tones:'5'},
-  {semitones:11,name:'7ª mayor',tones:'5½'},
+  {semitones:0,name:'Uníson',tones:'0'},
+  {semitones:1,name:'2a menor',tones:'½'},
+  {semitones:2,name:'2a major',tones:'1'},
+  {semitones:3,name:'3a menor',tones:'1½'},
+  {semitones:4,name:'3a major',tones:'2'},
+  {semitones:5,name:'4a justa',tones:'2½'},
+  {semitones:6,name:'Tritó',tones:'3'},
+  {semitones:7,name:'5a justa',tones:'3½'},
+  {semitones:8,name:'6a menor',tones:'4'},
+  {semitones:9,name:'6a major',tones:'4½'},
+  {semitones:10,name:'7a menor',tones:'5'},
+  {semitones:11,name:'7a major',tones:'5½'},
   {semitones:12,name:'Octava',tones:'6'}
 ];
 
@@ -90,7 +90,7 @@ function buildIntervalOptions(){
   INTERVALS.forEach(i=>{
     const opt=document.createElement('option');
     opt.value=i.semitones;
-    opt.textContent=`${i.name} (${i.tones} tono${i.tones=='1'?'':'s'})`;
+    opt.textContent=`${i.name} (${i.tones} to)`; // to: tons
     sel.appendChild(opt);
   });
 }
@@ -111,7 +111,6 @@ function generateInterval(){
   state.lastPairs.push(pair.join(','));
   if(state.lastPairs.length>10) state.lastPairs.shift();
 
-  // Generamos notas con accidental
   function noteWithAccidental(m){
     const baseNotes=['C','D','E','F','G','A','B'];
     let pc = m%12;
@@ -171,7 +170,7 @@ function loadQuestion(){
 function updateTimerDisplay(rem){
   const el=document.getElementById('timer');
   el.textContent=rem+'s';
-  el.style.background=rem<=5?'#fee2e2':'';
+  el.style.background=rem<=5?varColor('--danger'):'';
 }
 
 function startTimer(){
@@ -196,11 +195,11 @@ function evaluateAnswer(){
   const btn=document.getElementById('confirmBtn');
   if(correctSem && correctDir){
     state.correct++; document.getElementById('correct').textContent=state.correct;
-    showMessage('¡Correcto!',true);
+    showMessage('Correcte!',true);
     btn.style.background='var(--success)';
     setTimeout(()=>{btn.style.background='var(--primary)'; loadQuestion();},600);
   } else{
-    showMessage(`Incorrecto. Correcto: ${INTERVALS[semAbs].name} (${INTERVALS[semAbs].tones} tonos), ${dir==='asc'?'ascendente':'descendente'}`,false);
+    showMessage(`Incorrecte. Correcte: ${INTERVALS[semAbs].name} (${INTERVALS[semAbs].tones} tons), ${dir==='asc'?'ascendent':'descendent'}`,false);
     btn.style.background='var(--danger)'; setTimeout(()=>{btn.style.background='var(--primary)';},600);
   }
 }
@@ -208,7 +207,7 @@ function evaluateAnswer(){
 function onTimeUp(){
   const diff=state.midiB-state.midiA; const semAbs=Math.abs(diff); const dir=diff>0?'asc':(diff<0?'desc':'asc');
   state.attempts++; document.getElementById('attempts').textContent=state.attempts;
-  showMessage(`Se acabó el tiempo. Correcto: ${INTERVALS[semAbs].name} (${INTERVALS[semAbs].tones} tonos), ${dir==='asc'?'ascendente':'descendente'}`,false);
+  showMessage(`S’ha acabat el temps. Correcte: ${INTERVALS[semAbs].name} (${INTERVALS[semAbs].tones} tons), ${dir==='asc'?'ascendent':'descendent'}`,false);
   setTimeout(loadQuestion,1500);
 }
 
@@ -217,6 +216,8 @@ function showMessage(txt,ok=true){
   setTimeout(()=>{el.style.opacity=1;},50);
   setTimeout(()=>{el.style.opacity=0; setTimeout(()=>el.style.display='none',500);},2500);
 }
+
+function varColor(name){return getComputedStyle(document.documentElement).getPropertyValue(name);}
 
 buildIntervalOptions();
 
