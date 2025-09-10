@@ -20,6 +20,7 @@ h1{margin:0 0 10px 0; color:var(--primary); font-size:1.8rem;}
 select, button{padding:10px 16px; border-radius:10px; border:1px solid rgba(30,58,138,0.3); font-size:1rem;}
 button.primary{background:var(--primary); color:#fff; border:none; cursor:pointer;}
 button.primary:hover{background:var(--primary-light);}
+button.primary.disabled{opacity:0.5; cursor:not-allowed;}
 button.ghost{background:transparent; border:1px solid rgba(30,58,138,0.3); color:var(--primary); cursor:pointer;}
 button.ghost:hover{background:rgba(59,130,246,0.1);}
 .badge{padding:5px 10px; border-radius:12px; background:rgba(30,58,138,0.1); color:var(--primary);}
@@ -27,33 +28,17 @@ button.ghost:hover{background:rgba(59,130,246,0.1);}
 .ok{background:#d1fae5; color:var(--success);}
 .bad{background:#fee2e2; color:var(--danger);}
 .meta{display:flex; gap:16px; margin-top:14px; flex-wrap:wrap; font-size:0.95rem; color:var(--muted);}
+#startBtn{font-size:1.2rem; padding:14px 24px; margin-bottom:12px;}
 @media(max-width:750px){.controls{flex-direction:column;}}
-#popup-overlay{position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:1000;}
-#popup{background:#fff; padding:20px 30px; border-radius:16px; max-width:450px; position:relative; box-shadow:0 10px 40px rgba(0,0,0,0.2);}
-#popup h2{margin-top:0; color:var(--primary);}
-#popup p{margin-bottom:20px;}
-#popup button{margin-right:10px;}
-#popup .close{position:absolute; top:10px; right:15px; cursor:pointer; font-weight:bold; font-size:1.2rem; color:var(--primary);}
 </style>
 </head>
 <body>
-
-<div id="popup-overlay">
-  <div id="popup">
-    <span class="close">&times;</span>
-    <h2>Normas del Juego</h2>
-    <p>Reconoce intervalos musicales del unísono a la octava.<br>
-    Indica si el intervalo es ascendente o descendente.<br>
-    Tienes 20 segundos por ejercicio.<br>
-    ¡Practica infinitamente y mejora tu oído musical!</p>
-    <button id="startBtn" class="primary">Aceptar y empezar</button>
-  </div>
-</div>
 
 <div class="wrap">
   <div class="card">
     <h1>Entrenador de Intervalos Musical</h1>
     <p class="lead">Rango A3 → G5. Sostenidos/bemoles aleatorios. ¡Practica infinitamente!</p>
+    <button id="startBtn" class="primary">Iniciar Ejercicio</button>
     <div id="vf-container"></div>
     <div class="controls">
       <select id="intervalSelect"></select>
@@ -75,30 +60,93 @@ button.ghost:hover{background:rgba(59,130,246,0.1);}
 
 <script src="https://unpkg.com/vexflow@4.2.5/build/cjs/vexflow.js"></script>
 <script>
-const VF=Vex.Flow;
-const MIN_MIDI=57,MAX_MIDI=79,START_TIME=20;
-const INTERVALS={0:'Unísono',1:'2ª menor',2:'2ª mayor',3:'3ª menor',4:'3ª mayor',5:'4ª justa',6:'Tritono',7:'5ª justa',8:'6ª menor',9:'6ª mayor',10:'7ª menor',11:'7ª mayor',12:'Octava'};
-let state={midiA:null,midiB:null,attempts:0,correct:0,timer:null,startTime:null,renderer:null,context:null,stave:null,currentNotes:[]};
+const VF = Vex.Flow;
+const MIN_MIDI = 57, MAX_MIDI = 79, START_TIME = 20;
+const INTERVALS = {0:'Unísono',1:'2ª menor',2:'2ª mayor',3:'3ª menor',4:'3ª mayor',5:'4ª justa',6:'Tritono',7:'5ª justa',8:'6ª menor',9:'6ª mayor',10:'7ª menor',11:'7ª mayor',12:'Octava'};
+
+let state = {midiA:null,midiB:null,attempts:0,correct:0,timer:null,startTime:null,renderer:null,context:null,stave:null,voice:null};
 
 function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function randomMidi(){return randInt(MIN_MIDI,MAX_MIDI);}
-function midiToNote(m){const notes=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];let pc=m%12,oct=Math.floor(m/12)-1,n=notes[pc];if(['C#','D#','F#','G#','A#'].includes(n)) n=Math.random()<0.5?n:n[0]+'b';return n+'/'+oct;}
-function buildIntervalOptions(){const sel=document.getElementById('intervalSelect'); sel.innerHTML=''; for(let i=0;i<=12;i++){let opt=document.createElement('option'); opt.value=i; opt.textContent=`${INTERVALS[i]} (${i} semit.)`; sel.appendChild(opt);}}
+function midiToNote(m){const notes=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];let pc=m%12,oct=Math.floor(m/12)-1,n=notes[pc]; if(['C#','D#','F#','G#','A#'].includes(n)) n=Math.random()<0.5?n:n[0]+'b'; return n+'/'+oct;}
+function buildIntervalOptions(){const sel=document.getElementById('intervalSelect'); sel.innerHTML=''; for(let i=0;i<=12;i++){const opt=document.createElement('option'); opt.value=i; opt.textContent=`${INTERVALS[i]} (${i} semit.)`; sel.appendChild(opt);}}
 function pickPair(){let a=randomMidi(),offset=randInt(0,12),dir=Math.random()<0.5?-1:1; let b=Math.min(MAX_MIDI,Math.max(MIN_MIDI,a+offset*dir)); return [a,b];}
-function initRenderer(){const vf=document.getElementById('vf-container'); vf.innerHTML=''; state.renderer=new VF.Renderer(vf,VF.Renderer.Backends.SVG); state.renderer.resize(600,180); state.context=state.renderer.getContext(); state.stave=new VF.Stave(10,40,580); state.stave.addClef('treble').setContext(state.context).draw();}
-function renderNotes(a,b){state.currentNotes.forEach(n=>n.el.remove()); state.currentNotes=[]; const noteA=new VF.StaveNote({clef:'treble', keys:[midiToNote(a)], duration:'q'}); const noteB=new VF.StaveNote({clef:'treble', keys:[midiToNote(b)], duration:'q'});
-[noteA,noteB].forEach(n=>{const k=n.keys[0]; if(k.includes('#')) n.addModifier(0,new VF.Accidental('#')); else if(k.includes('b')) n.addModifier(0,new VF.Accidental('b')); });
-const voice=new VF.Voice({num_beats:2,beat_value:4}); voice.addTickables([noteA,noteB]); new VF.Formatter().joinVoices([voice]).format([voice],500); voice.draw(state.context,state.stave); state.currentNotes=[noteA,noteB];}
-function loadQuestion(){clearTimer(); const [a,b]=pickPair(); state.midiA=a; state.midiB=b; renderNotes(a,b); document.getElementById('message').style.display='none'; document.getElementById('intervalSelect').selectedIndex=0; document.getElementById('dirSelect').value='asc'; state.startTime=Date.now(); updateTimerDisplay(START_TIME); startTimer();}
+
+function initRenderer(){
+  const vfContainer = document.getElementById('vf-container');
+  vfContainer.innerHTML='';
+  state.renderer = new VF.Renderer(vfContainer, VF.Renderer.Backends.SVG);
+  state.renderer.resize(600,180);
+  state.context = state.renderer.getContext();
+  state.stave = new VF.Stave(10,40,580);
+  state.stave.addClef('treble').setContext(state.context).draw();
+}
+
+function renderNotes(a,b){
+  if(state.voice) state.voice = null;
+  const noteA = new VF.StaveNote({clef:'treble', keys:[midiToNote(a)], duration:'q'});
+  const noteB = new VF.StaveNote({clef:'treble', keys:[midiToNote(b)], duration:'q'});
+  [noteA,noteB].forEach(n=>{const k=n.keys[0]; if(k.includes('#')) n.addModifier(0,new VF.Accidental('#')); else if(k.includes('b')) n.addModifier(0,new VF.Accidental('b'));});
+  state.voice = new VF.Voice({num_beats:2, beat_value:4});
+  state.voice.addTickables([noteA,noteB]);
+  state.context.clear();
+  state.stave.setContext(state.context).draw();
+  new VF.Formatter().joinVoices([state.voice]).format([state.voice],500);
+  state.voice.draw(state.context,state.stave);
+}
+
+function loadQuestion(){
+  clearTimer();
+  const [a,b] = pickPair(); state.midiA=a; state.midiB=b;
+  renderNotes(a,b);
+  document.getElementById('message').style.display='none';
+  document.getElementById('intervalSelect').selectedIndex=0;
+  document.getElementById('dirSelect').value='asc';
+  state.startTime = Date.now(); updateTimerDisplay(START_TIME); startTimer();
+}
+
 function updateTimerDisplay(rem){const el=document.getElementById('timer'); el.textContent=rem+'s'; el.style.background=rem<=5?'#fee2e2':'';}
 function startTimer(){clearTimer(); state.timer=setInterval(()=>{const rem=Math.max(0,START_TIME-Math.floor((Date.now()-state.startTime)/1000)); updateTimerDisplay(rem); if(rem<=0){clearTimer(); onTimeUp();}},100);}
 function clearTimer(){if(state.timer){clearInterval(state.timer);state.timer=null;}}
-function evaluateAnswer(){clearTimer(); const selS=parseInt(document.getElementById('intervalSelect').value,10); const selDir=document.getElementById('dirSelect').value; const diff=state.midiB-state.midiA; const semAbs=Math.abs(diff); const dir=diff>0?'asc':(diff<0?'desc':'asc'); state.attempts++; document.getElementById('attempts').textContent=state.attempts; const correctSem=selS===semAbs; const correctDir=semAbs===0?true:selDir===dir; const btn=document.getElementById('confirmBtn'); if(correctSem && correctDir){state.correct++; document.getElementById('correct').textContent=state.correct; showMessage('¡Correcto!',true); btn.style.background='var(--success)'; setTimeout(()=>{btn.style.background='var(--primary)'; loadQuestion();},600);} else {showMessage(`Incorrecto. Correcto: ${INTERVALS[semAbs]} (${semAbs} semit.), ${dir==='asc'?'ascendente':'descendente'}`,false); btn.style.background='var(--danger)'; setTimeout(()=>{btn.style.background='var(--primary)';},600);}}
-function onTimeUp(){const diff=state.midiB-state.midiA; const semAbs=Math.abs(diff); const dir=diff>0?'asc':(diff<0?'desc':'asc'); state.attempts++; document.getElementById('attempts').textContent=state.attempts; showMessage(`Se acabó el tiempo. Correcto: ${INTERVALS[semAbs]} (${semAbs} semit.), ${dir==='asc'?'ascendente':'descendente'}`,false); setTimeout(loadQuestion,1500);}
-function showMessage(txt,ok=true){const el=document.getElementById('message'); el.textContent=txt; el.className='message '+(ok?'ok':'bad'); el.style.display='block'; setTimeout(()=>{el.style.opacity=1;},50); setTimeout(()=>{el.style.opacity=0; setTimeout(()=>el.style.display='none',500);},2500);}
-document.getElementById('confirmBtn').addEventListener('click',()=>evaluateAnswer()); document.getElementById('nextBtn').addEventListener('click',()=>loadQuestion()); buildIntervalOptions();
-// POPUP
-const popup=document.getElementById('popup-overlay'); document.querySelector('#popup .close').addEventListener('click',()=>{popup.style.display='none'; initRenderer(); loadQuestion();}); document.getElementById('startBtn').addEventListener('click',()=>{popup.style.display='none'; initRenderer(); loadQuestion();});
+
+function evaluateAnswer(){
+  clearTimer();
+  const selS=parseInt(document.getElementById('intervalSelect').value,10);
+  const selDir=document.getElementById('dirSelect').value;
+  const diff=state.midiB-state.midiA; const semAbs=Math.abs(diff);
+  const dir=diff>0?'asc':(diff<0?'desc':'asc');
+  state.attempts++; document.getElementById('attempts').textContent=state.attempts;
+  const correctSem=selS===semAbs; const correctDir=semAbs===0?true:selDir===dir;
+  const btn=document.getElementById('confirmBtn');
+  if(correctSem && correctDir){state.correct++; document.getElementById('correct').textContent=state.correct; showMessage('¡Correcto!',true); btn.style.background='var(--success)'; setTimeout(()=>{btn.style.background='var(--primary)'; loadQuestion();},600);}
+  else{showMessage(`Incorrecto. Correcto: ${INTERVALS[semAbs]} (${semAbs} semit.), ${dir==='asc'?'ascendente':'descendente'}`,false); btn.style.background='var(--danger)'; setTimeout(()=>{btn.style.background='var(--primary)';},600);}
+}
+
+function onTimeUp(){
+  const diff=state.midiB-state.midiA; const semAbs=Math.abs(diff); const dir=diff>0?'asc':(diff<0?'desc':'asc');
+  state.attempts++; document.getElementById('attempts').textContent=state.attempts;
+  showMessage(`Se acabó el tiempo. Correcto: ${INTERVALS[semAbs]} (${semAbs} semit.), ${dir==='asc'?'ascendente':'descendente'}`,false);
+  setTimeout(loadQuestion,1500);
+}
+
+function showMessage(txt,ok=true){
+  const el=document.getElementById('message'); el.textContent=txt; el.className='message '+(ok?'ok':'bad'); el.style.display='block';
+  setTimeout(()=>{el.style.opacity=1;},50);
+  setTimeout(()=>{el.style.opacity=0; setTimeout(()=>el.style.display='none',500);},2500);
+}
+
+buildIntervalOptions();
+document.getElementById('confirmBtn').addEventListener('click',()=>evaluateAnswer());
+document.getElementById('nextBtn').addEventListener('click',()=>loadQuestion());
+
+// BOTÓN START
+const startBtn = document.getElementById('startBtn');
+startBtn.addEventListener('click',()=>{
+  initRenderer();
+  loadQuestion();
+  startBtn.classList.add('disabled');
+  startBtn.disabled = true;
+});
 </script>
 </body>
 </html>
