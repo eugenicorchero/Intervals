@@ -86,14 +86,16 @@ const MIN_MIDI=57, MAX_MIDI=79, START_TIME=20;
 const INTERVALS={0:'Unísono',1:'2ª menor',2:'2ª mayor',3:'3ª menor',4:'3ª mayor',5:'4ª justa',6:'Tritono',7:'5ª justa',8:'6ª menor',9:'6ª mayor',10:'7ª menor',11:'7ª mayor',12:'Octava'};
 let state={midiA:null,midiB:null,attempts:0,correct:0,timer:null,startTime:null};
 
-// Renderer único
+// Renderer y grupo SVG para notas
 const vfContainer=document.getElementById('vf-container');
 const renderer=new VF.Renderer(vfContainer,VF.Renderer.Backends.SVG);
 renderer.resize(600,180);
 const context=renderer.getContext();
 const stave=new VF.Stave(10,40,580);
 stave.addClef('treble').setContext(context).draw();
-let lastNotes=[];
+
+// Grupo para notas
+const notesGroup=context.openGroup();
 
 // Auxiliares
 function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
@@ -105,10 +107,9 @@ function midiToNote(midi){
   return name+'/'+octave;
 }
 
-// Renderizar notas
+// Renderizar notas limpiando grupo
 function renderNotes(a,b){
-  lastNotes.forEach(n=>n.elem.remove());
-  lastNotes=[];
+  notesGroup.clear(); // limpia notas previas
   const noteA=new VF.StaveNote({clef:'treble', keys:[midiToNote(a)], duration:'q'});
   const noteB=new VF.StaveNote({clef:'treble', keys:[midiToNote(b)], duration:'q'});
   [noteA,noteB].forEach(n=>{
@@ -120,7 +121,6 @@ function renderNotes(a,b){
   voice.addTickables([noteA,noteB]);
   new VF.Formatter().joinVoices([voice]).format([voice],500);
   voice.draw(context,stave);
-  lastNotes=[noteA,noteB];
 }
 
 // UI intervalos
@@ -204,6 +204,7 @@ function onTimeUp(){
   const dir=diff>0?'asc':(diff<0?'desc':'asc');
   state.attempts++; document.getElementById('attempts').textContent=state.attempts;
   showMessage(`Se acabó el tiempo. Correcto: ${INTERVALS[semAbs]} (${semAbs} semit.), ${dir==='asc'?'ascendente':'descendente'}`, false);
+  setTimeout(loadQuestion,1500);
 }
 
 // Mensajes
