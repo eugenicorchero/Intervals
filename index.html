@@ -62,16 +62,66 @@ button.ghost:hover{background:rgba(59,130,246,0.1);}
 <script>
 const VF = Vex.Flow;
 const MIN_MIDI = 57, MAX_MIDI = 79, START_TIME = 20;
-const INTERVALS = {0:'Unísono',1:'2ª menor',2:'2ª mayor',3:'3ª menor',4:'3ª mayor',5:'4ª justa',6:'Tritono',7:'5ª justa',8:'6ª menor',9:'6ª mayor',10:'7ª menor',11:'7ª mayor',12:'Octava'};
+const INTERVALS = [
+  {semitones:0,name:'Unísono',tones:'0'},
+  {semitones:1,name:'2ª menor',tones:'½'},
+  {semitones:2,name:'2ª mayor',tones:'1'},
+  {semitones:3,name:'3ª menor',tones:'1½'},
+  {semitones:4,name:'3ª mayor',tones:'2'},
+  {semitones:5,name:'4ª justa',tones:'2½'},
+  {semitones:6,name:'Tritono',tones:'3'},
+  {semitones:7,name:'5ª justa',tones:'3½'},
+  {semitones:8,name:'6ª menor',tones:'4'},
+  {semitones:9,name:'6ª mayor',tones:'4½'},
+  {semitones:10,name:'7ª menor',tones:'5'},
+  {semitones:11,name:'7ª mayor',tones:'5½'},
+  {semitones:12,name:'Octava',tones:'6'}
+];
 
-let state = {midiA:null,midiB:null,attempts:0,correct:0,timer:null,startTime:null,renderer:null,context:null,stave:null,voice:null};
+let state = {midiA:null,midiB:null,attempts:0,correct:0,timer:null,startTime:null,renderer:null,context:null,stave:null,voice:null,lastPairs:[]};
 
 function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function randomMidi(){return randInt(MIN_MIDI,MAX_MIDI);}
-function midiToNote(m){const notes=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];let pc=m%12,oct=Math.floor(m/12)-1,n=notes[pc]; if(['C#','D#','F#','G#','A#'].includes(n)) n=Math.random()<0.5?n:n[0]+'b'; return n+'/'+oct;}
-function buildIntervalOptions(){const sel=document.getElementById('intervalSelect'); sel.innerHTML=''; for(let i=0;i<=12;i++){const opt=document.createElement('option'); opt.value=i; opt.textContent=`${INTERVALS[i]} (${i} semit.)`; sel.appendChild(opt);}}
-function pickPair(){let a=randomMidi(),offset=randInt(0,12),dir=Math.random()<0.5?-1:1; let b=Math.min(MAX_MIDI,Math.max(MIN_MIDI,a+offset*dir)); return [a,b];}
 
+// Generar nota con sostenido/bemol aleatorio
+function midiToNote(m){
+  const notes=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  let pc=m%12,oct=Math.floor(m/12)-1,n=notes[pc];
+  if(['C#','D#','F#','G#','A#'].includes(n)) n=Math.random()<0.5?n:n[0]+'b';
+  else if(Math.random()<0.15) n=n[0]+'#'; else if(Math.random()<0.15) n=n[0]+'b';
+  return n+'/'+oct;
+}
+
+// Menu desplegable
+function buildIntervalOptions(){
+  const sel=document.getElementById('intervalSelect'); sel.innerHTML='';
+  INTERVALS.forEach(i=>{
+    const opt=document.createElement('option');
+    opt.value=i.semitones;
+    opt.textContent=`${i.name} (${i.tones} tono${i.tones=='1'?'':'s'})`;
+    sel.appendChild(opt);
+  });
+}
+
+// Elegir par de notas coherente, con sostenidos/bemoles y aleatorio
+function pickPair(){
+  let attempts=0, pair;
+  do{
+    let midiA = randomMidi();
+    let semitones = randInt(0,12);
+    let dir = Math.random()<0.5?1:-1;
+    let midiB = midiA + semitones*dir;
+    if(midiB<MIN_MIDI) midiB=MIN_MIDI;
+    if(midiB>MAX_MIDI) midiB=MAX_MIDI;
+    pair=[midiA,midiB];
+    attempts++;
+  }while(state.lastPairs.includes(pair.join(',')) && attempts<50);
+  state.lastPairs.push(pair.join(','));
+  if(state.lastPairs.length>10) state.lastPairs.shift();
+  return pair;
+}
+
+// Renderer y pentagrama
 function initRenderer(){
   const vfContainer = document.getElementById('vf-container');
   vfContainer.innerHTML='';
@@ -82,11 +132,16 @@ function initRenderer(){
   state.stave.addClef('treble').setContext(state.context).draw();
 }
 
+// Renderizar notas
 function renderNotes(a,b){
-  if(state.voice) state.voice = null;
-  const noteA = new VF.StaveNote({clef:'treble', keys:[midiToNote(a)], duration:'q'});
-  const noteB = new VF.StaveNote({clef:'treble', keys:[midiToNote(b)], duration:'q'});
-  [noteA,noteB].forEach(n=>{const k=n.keys[0]; if(k.includes('#')) n.addModifier(0,new VF.Accidental('#')); else if(k.includes('b')) n.addModifier(0,new VF.Accidental('b'));});
+  if(state.voice) state.voice=null;
+  const noteA=new VF.StaveNote({clef:'treble', keys:[midiToNote(a)], duration:'q'});
+  const noteB=new VF.StaveNote({clef:'treble', keys:[midiToNote(b)], duration:'q'});
+  [noteA,noteB].forEach(n=>{
+    const k=n.keys[0]; 
+    if(k.includes('#')) n.addModifier(0,new VF.Accidental('#')); 
+    else if(k.includes('b')) n.addModifier(0,new VF.Accidental('b'));
+  });
   state.voice = new VF.Voice({num_beats:2, beat_value:4});
   state.voice.addTickables([noteA,noteB]);
   state.context.clear();
@@ -95,20 +150,27 @@ function renderNotes(a,b){
   state.voice.draw(state.context,state.stave);
 }
 
+// Cargar ejercicio
 function loadQuestion(){
   clearTimer();
-  const [a,b] = pickPair(); state.midiA=a; state.midiB=b;
+  const [a,b]=pickPair(); state.midiA=a; state.midiB=b;
   renderNotes(a,b);
   document.getElementById('message').style.display='none';
   document.getElementById('intervalSelect').selectedIndex=0;
   document.getElementById('dirSelect').value='asc';
-  state.startTime = Date.now(); updateTimerDisplay(START_TIME); startTimer();
+  state.startTime=Date.now(); updateTimerDisplay(START_TIME); startTimer();
 }
 
+// Timer
 function updateTimerDisplay(rem){const el=document.getElementById('timer'); el.textContent=rem+'s'; el.style.background=rem<=5?'#fee2e2':'';}
-function startTimer(){clearTimer(); state.timer=setInterval(()=>{const rem=Math.max(0,START_TIME-Math.floor((Date.now()-state.startTime)/1000)); updateTimerDisplay(rem); if(rem<=0){clearTimer(); onTimeUp();}},100);}
+function startTimer(){clearTimer(); state.timer=setInterval(()=>{
+  const rem=Math.max(0,START_TIME-Math.floor((Date.now()-state.startTime)/1000));
+  updateTimerDisplay(rem);
+  if(rem<=0){clearTimer(); onTimeUp();}
+},100);}
 function clearTimer(){if(state.timer){clearInterval(state.timer);state.timer=null;}}
 
+// Evaluar respuesta
 function evaluateAnswer(){
   clearTimer();
   const selS=parseInt(document.getElementById('intervalSelect').value,10);
@@ -118,17 +180,23 @@ function evaluateAnswer(){
   state.attempts++; document.getElementById('attempts').textContent=state.attempts;
   const correctSem=selS===semAbs; const correctDir=semAbs===0?true:selDir===dir;
   const btn=document.getElementById('confirmBtn');
-  if(correctSem && correctDir){state.correct++; document.getElementById('correct').textContent=state.correct; showMessage('¡Correcto!',true); btn.style.background='var(--success)'; setTimeout(()=>{btn.style.background='var(--primary)'; loadQuestion();},600);}
-  else{showMessage(`Incorrecto. Correcto: ${INTERVALS[semAbs]} (${semAbs} semit.), ${dir==='asc'?'ascendente':'descendente'}`,false); btn.style.background='var(--danger)'; setTimeout(()=>{btn.style.background='var(--primary)';},600);}
+  if(correctSem && correctDir){state.correct++; document.getElementById('correct').textContent=state.correct;
+    showMessage('¡Correcto!',true);
+    btn.style.background='var(--success)';
+    setTimeout(()=>{btn.style.background='var(--primary)'; loadQuestion();},600);}
+  else{showMessage(`Incorrecto. Correcto: ${INTERVALS[semAbs].name} (${INTERVALS[semAbs].tones} tonos), ${dir==='asc'?'ascendente':'descendente'}`,false);
+    btn.style.background='var(--danger)'; setTimeout(()=>{btn.style.background='var(--primary)';},600);}
 }
 
+// Tiempo agotado
 function onTimeUp(){
   const diff=state.midiB-state.midiA; const semAbs=Math.abs(diff); const dir=diff>0?'asc':(diff<0?'desc':'asc');
   state.attempts++; document.getElementById('attempts').textContent=state.attempts;
-  showMessage(`Se acabó el tiempo. Correcto: ${INTERVALS[semAbs]} (${semAbs} semit.), ${dir==='asc'?'ascendente':'descendente'}`,false);
+  showMessage(`Se acabó el tiempo. Correcto: ${INTERVALS[semAbs].name} (${INTERVALS[semAbs].tones} tonos), ${dir==='asc'?'ascendente':'descendente'}`,false);
   setTimeout(loadQuestion,1500);
 }
 
+// Mostrar mensaje
 function showMessage(txt,ok=true){
   const el=document.getElementById('message'); el.textContent=txt; el.className='message '+(ok?'ok':'bad'); el.style.display='block';
   setTimeout(()=>{el.style.opacity=1;},50);
@@ -139,13 +207,13 @@ buildIntervalOptions();
 document.getElementById('confirmBtn').addEventListener('click',()=>evaluateAnswer());
 document.getElementById('nextBtn').addEventListener('click',()=>loadQuestion());
 
-// BOTÓN START
-const startBtn = document.getElementById('startBtn');
+// START BUTTON
+const startBtn=document.getElementById('startBtn');
 startBtn.addEventListener('click',()=>{
   initRenderer();
   loadQuestion();
   startBtn.classList.add('disabled');
-  startBtn.disabled = true;
+  startBtn.disabled=true;
 });
 </script>
 </body>
