@@ -1,36 +1,34 @@
 <!DOCTYPE html>
-<html lang="ca">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Entrenador d'Intervals Musicals</title>
+<title>Entrenador de Intervalos Musical</title>
 <style>
 :root{
-  --bg-dark:#1f2937; --bg-card:#374151; --primary:#3b82f6; --primary-light:#60a5fa;
-  --success:#10b981; --danger:#ef4444; --muted:#d1d5db; --text:#f9fafb;
+  --primary:#1e3a8a; --primary-light:#3b82f6; --bg:#f0f4ff; --card:#ffffff;
+  --success:#10b981; --danger:#ef4444; --muted:#4b5563;
   font-family:'Inter',sans-serif;
 }
-body{margin:0; background:var(--bg-dark); color:var(--text);}
+body{margin:0; background:var(--bg); color:#111827;}
 .wrap{max-width:900px; margin:20px auto; padding:20px;}
-.card{background:var(--bg-card); border-radius:16px; padding:25px; box-shadow:0 10px 30px rgba(0,0,0,0.3);}
+.card{background:var(--card); border-radius:16px; padding:25px; box-shadow:0 15px 40px rgba(0,0,0,0.08);}
 h1{margin:0 0 10px 0; color:var(--primary); font-size:1.8rem;}
 .lead{color:var(--muted); margin:0 0 20px 0; font-size:1rem;}
-#vf-container{border-radius:12px; padding:12px; min-height:180px; background:#ffffff; display:flex; align-items:center; justify-content:center;}
+#vf-container{border-radius:12px; padding:12px; min-height:180px; background:#fff; display:flex; align-items:center; justify-content:center;}
 .controls{margin-top:16px; display:flex; flex-wrap:wrap; gap:12px; align-items:center;}
-select, button{padding:10px 16px; border-radius:10px; border:1px solid rgba(59,130,246,0.5); font-size:1rem; background:var(--bg-dark); color:var(--text);}
-select option{background:var(--bg-card);}
+select, button{padding:10px 16px; border-radius:10px; border:1px solid rgba(30,58,138,0.3); font-size:1rem;}
 button.primary{background:var(--primary); color:#fff; border:none; cursor:pointer;}
 button.primary:hover{background:var(--primary-light);}
 button.primary.disabled{opacity:0.5; cursor:not-allowed;}
-button.ghost{background:transparent; border:1px solid rgba(59,130,246,0.5); color:var(--primary); cursor:pointer;}
+button.ghost{background:transparent; border:1px solid rgba(30,58,138,0.3); color:var(--primary); cursor:pointer;}
 button.ghost:hover{background:rgba(59,130,246,0.1);}
-.badge{padding:5px 10px; border-radius:12px; background:rgba(59,130,246,0.2); color:var(--text);}
+.badge{padding:5px 10px; border-radius:12px; background:rgba(30,58,138,0.1); color:var(--primary);}
 .message{margin-top:12px; padding:12px; border-radius:12px; display:none; font-weight:700; opacity:0; transition: opacity 0.3s;}
-.ok{background:#065f46; color:var(--success);}
-.bad{background:#991b1b; color:var(--danger);}
+.ok{background:#d1fae5; color:var(--success);}
+.bad{background:#fee2e2; color:var(--danger);}
 .meta{display:flex; gap:16px; margin-top:14px; flex-wrap:wrap; font-size:0.95rem; color:var(--muted);}
 #startBtn{font-size:1.2rem; padding:14px 24px; margin-bottom:12px;}
-footer{margin-top:30px; text-align:center; color:var(--muted); font-size:0.85rem;}
 @media(max-width:750px){.controls{flex-direction:column;}}
 </style>
 </head>
@@ -38,182 +36,197 @@ footer{margin-top:30px; text-align:center; color:var(--muted); font-size:0.85rem
 
 <div class="wrap">
   <div class="card">
-    <h1>Entrenador d'Intervals Musicals</h1>
-    <p class="lead">Rang A3 → G5. Sostenuts i bemolls aleatoris. Practica de manera infinita!</p>
-    <button id="startBtn" class="primary">Comença l’exercici</button>
+    <h1>Entrenador de Intervalos Musical</h1>
+    <p class="lead">Rango A3 → G5. Sostenidos/bemoles aleatorios. ¡Practica infinitamente!</p>
+    <button id="startBtn" class="primary">Iniciar Ejercicio</button>
     <div id="vf-container"></div>
     <div class="controls">
       <select id="intervalSelect"></select>
       <select id="dirSelect">
-        <option value="asc">Ascendent</option>
-        <option value="desc">Descendent</option>
+        <option value="asc">Ascendente</option>
+        <option value="desc">Descendente</option>
       </select>
-      <button id="confirmBtn" class="primary">Comprovar</button>
-      <button id="nextBtn" class="ghost">Següent</button>
-      <div style="margin-left:auto;">Temps restant: <span id="timer" class="badge">20s</span></div>
+      <button id="confirmBtn" class="primary">Confirmar</button>
+      <button id="nextBtn" class="ghost">Siguiente</button>
+      <div style="margin-left:auto;">Tiempo: <span id="timer" class="badge">20s</span></div>
     </div>
     <div class="message" id="message"></div>
     <div class="meta">
-      Intents: <span id="attempts" class="badge">0</span>
-      Encerts: <span id="correct" class="badge">0</span>
+      Intentos: <span id="attempts" class="badge">0</span>
+      Aciertos: <span id="correct" class="badge">0</span>
     </div>
   </div>
 </div>
 
-<footer>2025 Eugeni Corchero</footer>
-
-<script src="https://unpkg.com/vexflow/build/cjs/vexflow.js"></script>
+<script src="https://unpkg.com/vexflow@4.2.5/build/cjs/vexflow.js"></script>
 <script>
 const VF = Vex.Flow;
 const MIN_MIDI = 57, MAX_MIDI = 79, START_TIME = 20;
 const INTERVALS = [
-  {semitones:0,name:'Uníson',tones:'0'},
+  {semitones:0,name:'Unísono',tones:'0'},
   {semitones:1,name:'2ª menor',tones:'½'},
-  {semitones:2,name:'2ª major',tones:'1'},
+  {semitones:2,name:'2ª mayor',tones:'1'},
   {semitones:3,name:'3ª menor',tones:'1½'},
-  {semitones:4,name:'3ª major',tones:'2'},
+  {semitones:4,name:'3ª mayor',tones:'2'},
   {semitones:5,name:'4ª justa',tones:'2½'},
-  {semitones:6,name:'Tríton',tones:'3'},
+  {semitones:6,name:'Tritono',tones:'3'},
   {semitones:7,name:'5ª justa',tones:'3½'},
   {semitones:8,name:'6ª menor',tones:'4'},
-  {semitones:9,name:'6ª major',tones:'4½'},
+  {semitones:9,name:'6ª mayor',tones:'4½'},
   {semitones:10,name:'7ª menor',tones:'5'},
-  {semitones:11,name:'7ª major',tones:'5½'},
+  {semitones:11,name:'7ª mayor',tones:'5½'},
   {semitones:12,name:'Octava',tones:'6'}
 ];
-const BASE_NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 
-let state = {lastPairs:[], midiA:null, midiB:null, noteA:null, noteB:null, currentSemitones:null, currentDir:null, attempts:0, correct:0, timer:null, startTime:null, renderer:null, context:null};
+let state = {
+  midiA:null, midiB:null, currentSemitones:null, currentDir:null,
+  attempts:0, correct:0, timer:null, startTime:null, renderer:null, context:null,
+  lastPairs:[]
+};
 
 function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
-
 function buildIntervalOptions(){
   const sel=document.getElementById('intervalSelect'); sel.innerHTML='';
   INTERVALS.forEach(i=>{
     const opt=document.createElement('option');
     opt.value=i.semitones;
-    opt.textContent=`${i.name} (${i.tones} to)`; 
+    opt.textContent=`${i.name} (${i.tones} tono${i.tones=='1'?'':'s'})`;
     sel.appendChild(opt);
   });
-}
-
-function generarNotaAleatoria(minMidi=MIN_MIDI,maxMidi=MAX_MIDI){
-  let midi = randInt(minMidi,maxMidi);
-  let accidental = null;
-  const r = Math.random();
-  if(r<0.15) accidental='#';
-  else if(r<0.3) accidental='b';
-  const octave = Math.floor(midi/12) -1;
-  const noteIndex = midi%12;
-  const noteBase = BASE_NOTES[noteIndex].replace('#','');
-  let noteName = noteBase+'/'+octave;
-  return {midi, noteName, accidental};
 }
 
 function generateInterval(){
   let attempts=0,pair;
   do{
-    const n1 = generarNotaAleatoria();
-    const n2 = generarNotaAleatoria();
-    const diff = n2.midi-n1.midi;
-    const semAbs = Math.abs(diff);
-    if(semAbs>12) continue;
-    pair=[n1,n2];
+    const midiA=randInt(MIN_MIDI,MAX_MIDI);
+    const semitones=randInt(0,12);
+    const dir=Math.random()<0.5?1:-1;
+    let midiB=midiA+semitones*dir;
+    if(midiB<MIN_MIDI) midiB=MIN_MIDI;
+    if(midiB>MAX_MIDI) midiB=MAX_MIDI;
+    pair=[midiA,midiB];
     attempts++;
-  }while(state.lastPairs.includes(pair.map(n=>n.midi).join(',')) && attempts<50);
-  state.lastPairs.push(pair.map(n=>n.midi).join(','));
+  }while(state.lastPairs.includes(pair.join(',')) && attempts<50);
+
+  state.lastPairs.push(pair.join(','));
   if(state.lastPairs.length>10) state.lastPairs.shift();
-  const dir = pair[1].midi>pair[0].midi?'asc':(pair[1].midi<pair[0].midi?'desc':'asc');
-  const semitones=Math.abs(pair[1].midi-pair[0].midi);
-  const intervalObj = INTERVALS.find(i=>i.semitones===semitones);
-  state.midiA=pair[0].midi; state.midiB=pair[1].midi;
-  state.noteA=pair[0]; state.noteB=pair[1];
-  state.currentSemitones=semitones; state.currentDir=dir;
-  return {noteA:pair[0],noteB:pair[1],semitones,dir,intervalName:intervalObj.name};
+
+  // Generamos notas con accidental
+  function noteWithAccidental(m){
+    const baseNotes=['C','D','E','F','G','A','B'];
+    let pc = m%12;
+    let oct = Math.floor(m/12)-1;
+    let noteName = baseNotes[pc%7]+'/'+oct;
+    let accidental = null;
+    const r = Math.random();
+    if(r<0.15) accidental='#';
+    else if(r<0.3) accidental='b';
+    return {note: noteName, accidental: accidental};
+  }
+
+  const noteA = noteWithAccidental(pair[0]);
+  const noteB = noteWithAccidental(pair[1]);
+  const dir = pair[1]>pair[0]?'asc':(pair[1]<pair[0]?'desc':'asc');
+  return {midiA:pair[0], midiB:pair[1], noteA, noteB, semitones:Math.abs(pair[1]-pair[0]), dir};
 }
 
 function renderInterval(interval){
-  const vfContainer=document.getElementById('vf-container'); vfContainer.innerHTML='';
+  const vfContainer = document.getElementById('vf-container');
+  vfContainer.innerHTML='';
   state.renderer=new VF.Renderer(vfContainer,VF.Renderer.Backends.SVG);
   state.renderer.resize(600,180);
   state.context=state.renderer.getContext();
   const stave=new VF.Stave(10,40,580);
   stave.addClef('treble').setContext(state.context).draw();
-  const notes=[interval.noteA,interval.noteB].map(nObj=>{
-    let keyName = nObj.noteName;
-    if(nObj.accidental==='b') keyName = keyName[0]+'b/'+keyName.split('/')[1];
-    else if(nObj.accidental===' #') keyName = keyName[0]+'#/'+keyName.split('/')[1];
-    const n=new VF.StaveNote({clef:'treble', keys:[keyName], duration:'q'});
-    if(nObj.accidental && nObj.accidental!=='') n.addAccidental(0,new VF.Accidental(nObj.accidental));
+
+  const notes = [interval.noteA, interval.noteB].map(nObj=>{
+    const n = new VF.StaveNote({clef:'treble', keys:[nObj.note], duration:'q'});
+    if(nObj.accidental) n.addAccidental(0,new VF.Accidental(nObj.accidental));
     return n;
   });
-  const voice=new VF.Voice({num_beats:2, beat_value:4});
+
+  const voice = new VF.Voice({num_beats:2, beat_value:4});
   voice.addTickables(notes);
   new VF.Formatter().joinVoices([voice]).format([voice],500);
   voice.draw(state.context,stave);
+
+  state.midiA = interval.midiA;
+  state.midiB = interval.midiB;
+  state.currentSemitones = interval.semitones;
+  state.currentDir = interval.dir;
+}
+
+function loadQuestion(){
+  clearTimer();
+  const interval = generateInterval();
+  renderInterval(interval);
+  document.getElementById('message').style.display='none';
+  document.getElementById('intervalSelect').selectedIndex=0;
+  document.getElementById('dirSelect').value='asc';
+  state.startTime=Date.now();
+  updateTimerDisplay(START_TIME);
+  startTimer();
 }
 
 function updateTimerDisplay(rem){
   const el=document.getElementById('timer');
   el.textContent=rem+'s';
-  el.style.background=rem<=5?'#991b1b':'';
+  el.style.background=rem<=5?'#fee2e2':'';
 }
 
 function startTimer(){
   clearTimer();
-  state.startTime=Date.now();
   state.timer=setInterval(()=>{
     const rem=Math.max(0,START_TIME-Math.floor((Date.now()-state.startTime)/1000));
     updateTimerDisplay(rem);
-    if(rem<=0){clearTimer();onTimeUp();}
+    if(rem<=0){clearTimer(); onTimeUp();}
   },100);
 }
 
 function clearTimer(){if(state.timer){clearInterval(state.timer);state.timer=null;}}
 
-function loadQuestion(){
-  clearTimer();
-  const interval=generateInterval();
-  renderInterval(interval);
-  document.getElementById('message').style.display='none';
-  document.getElementById('intervalSelect').selectedIndex=0;
-  document.getElementById('dirSelect').value='asc';
-  startTimer();
-}
-
-function showMessage(txt,ok=true){
-  const el=document.getElementById('message');
-  el.textContent=txt;
-  el.className='message '+(ok?'ok':'bad');
-  el.style.display='block';
-  setTimeout(()=>{el.style.opacity=1;},50);
-  setTimeout(()=>{el.style.opacity=0; setTimeout(()=>el.style.display='none',500);},2500);
-}
-
 function evaluateAnswer(){
   clearTimer();
   const selS=parseInt(document.getElementById('intervalSelect').value,10);
   const selDir=document.getElementById('dirSelect').value;
-  const diff=state.midiB-state.midiA;
-  const semAbs=Math.abs(diff);
+  const diff=state.midiB-state.midiA; const semAbs=Math.abs(diff);
   const dir=diff>0?'asc':(diff<0?'desc':'asc');
   state.attempts++; document.getElementById('attempts').textContent=state.attempts;
   const correctSem=selS===semAbs; const correctDir=semAbs===0?true:selDir===dir;
-  if(correctSem && correctDir){state.correct++; document.getElementById('correct').textContent=state.correct; showMessage('Correcte!',true);}
-  else{showMessage(`Incorrecte! Interval era ${state.currentSemitones} semitons (${state.currentDir})`,false);}
+  const btn=document.getElementById('confirmBtn');
+  if(correctSem && correctDir){
+    state.correct++; document.getElementById('correct').textContent=state.correct;
+    showMessage('¡Correcto!',true);
+    btn.style.background='var(--success)';
+    setTimeout(()=>{btn.style.background='var(--primary)'; loadQuestion();},600);
+  } else{
+    showMessage(`Incorrecto. Correcto: ${INTERVALS[semAbs].name} (${INTERVALS[semAbs].tones} tonos), ${dir==='asc'?'ascendente':'descendente'}`,false);
+    btn.style.background='var(--danger)'; setTimeout(()=>{btn.style.background='var(--primary)';},600);
+  }
 }
 
-function onTimeUp(){showMessage('Temps esgotat!',false);}
+function onTimeUp(){
+  const diff=state.midiB-state.midiA; const semAbs=Math.abs(diff); const dir=diff>0?'asc':(diff<0?'desc':'asc');
+  state.attempts++; document.getElementById('attempts').textContent=state.attempts;
+  showMessage(`Se acabó el tiempo. Correcto: ${INTERVALS[semAbs].name} (${INTERVALS[semAbs].tones} tonos), ${dir==='asc'?'ascendente':'descendente'}`,false);
+  setTimeout(loadQuestion,1500);
+}
 
-document.getElementById('startBtn').addEventListener('click',()=>{
-  loadQuestion();
-  document.getElementById('startBtn').disabled=true; 
-  document.getElementById('startBtn').style.opacity=0.5;
-});
-document.getElementById('confirmBtn').addEventListener('click',evaluateAnswer);
-document.getElementById('nextBtn').addEventListener('click',loadQuestion);
+function showMessage(txt,ok=true){
+  const el=document.getElementById('message'); el.textContent=txt; el.className='message '+(ok?'ok':'bad'); el.style.display='block';
+  setTimeout(()=>{el.style.opacity=1;},50);
+  setTimeout(()=>{el.style.opacity=0; setTimeout(()=>el.style.display='none',500);},2500);
+}
 
 buildIntervalOptions();
+
+document.getElementById('confirmBtn').addEventListener('click',()=>evaluateAnswer());
+document.getElementById('nextBtn').addEventListener('click',()=>loadQuestion());
+document.getElementById('startBtn').addEventListener('click',()=>{
+  loadQuestion();
+  document.getElementById('startBtn').classList.add('disabled'); 
+  document.getElementById('startBtn').disabled=true;
+});
 </script>
 </body>
 </html>
