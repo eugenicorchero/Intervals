@@ -1,471 +1,407 @@
 <!DOCTYPE html>
 <html lang="ca">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Entrenador d’Intervals Musicals — v14</title>
-<style>
-:root{
-  --bg:#0f1114;
-  --card:#181a1d;
-  --panel:#0b0b0c;
-  --text:#ffffff;
-  --muted:#bfc4c9;
-  --primary:#0A84FF;
-  --primary-hover:#339CFF;
-  --success:#30D158;
-  --danger:#FF453A;
-  --alert:#FF9F0A;
-  --white-note-bg:#ffffff;
-}
-*{box-sizing:border-box}
-body{margin:0; font-family:Inter, system-ui, -apple-system, "Helvetica Neue", Arial; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased;}
-.wrap{max-width:980px; margin:24px auto; padding:20px;}
-.card{background:var(--card); border-radius:16px; padding:28px; box-shadow: 0 8px 30px rgba(2,6,23,0.6);}
-.header{display:flex;gap:16px;align-items:center;justify-content:space-between;}
-.title{display:flex;flex-direction:column;}
-h1{margin:0;color:var(--primary);font-size:20px}
-.lead{margin:6px 0 0 0;color:var(--muted);font-size:13px}
-.controls-wrap{margin-top:18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-#vf-container{border-radius:12px; background:var(--white-note-bg); padding:10px; min-height:170px; display:flex;align-items:center;justify-content:center; margin-top:18px;}
-.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-select, button{font-size:14px;padding:10px 14px;border-radius:10px;border:none;outline:none}
-select{background:#0f1720;color:var(--text);min-width:180px}
-button.primary{background:var(--primary); color:#fff; cursor:pointer; transition:all .16s; border-radius:10px}
-button.primary:hover{background:var(--primary-hover)}
-button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text);cursor:pointer}
-button.disabled{opacity:.45;cursor:not-allowed}
-.badge{background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:10px;color:var(--muted);font-size:13px}
-.message{margin-top:12px;padding:12px;border-radius:10px;display:none;font-weight:700;opacity:0;transition:opacity .25s}
-.ok{background:rgba(48,209,88,0.12);color:var(--success)}
-.bad{background:rgba(255,69,58,0.08);color:var(--danger)}
-.meta{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;color:var(--muted);font-size:13px}
-.top-actions{display:flex;gap:12px;align-items:center}
-#startBtn{font-size:15px;padding:12px 18px}
-@media (max-width:700px){
-  #vf-container{min-height:150px}
-  select{min-width:140px}
-  .controls-wrap{flex-direction:column;align-items:stretch}
-}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Entrenador d’Intervals Musicals — v13+</title>
+  <style>
+    :root{
+      --bg:#0f1114;
+      --card:#181a1d;
+      --panel:#0b0b0c;
+      --text:#e6edf3;
+      --muted:#9aa4ad;
+      --primary:#0A84FF;
+      --primary-hover:#339CFF;
+      --success:#30D158;
+      --danger:#FF453A;
+      --white-note-bg:#ffffff;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,"Helvetica Neue",Arial;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+    .wrap{max-width:980px;margin:24px auto;padding:20px;}
+    .card{background:var(--card);border-radius:14px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,0.6)}
+    .header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    h1{margin:0;color:var(--primary);font-size:20px}
+    .lead{margin:6px 0 0 0;color:var(--muted);font-size:13px}
+    #vf-container{border-radius:10px;background:var(--white-note-bg);padding:12px;min-height:170px;display:flex;align-items:center;justify-content:center;margin-top:18px}
+    .controls-wrap{margin-top:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    select,button{font-size:14px;padding:10px 14px;border-radius:10px;border:none;outline:none}
+    select{min-width:180px;background:#0f1720;color:var(--text)}
+    button.primary{background:var(--primary);color:#fff;cursor:pointer;transition:all .14s;border-radius:10px}
+    button.primary:hover{background:var(--primary-hover)}
+    button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text);cursor:pointer;border-radius:10px}
+    button.disabled{opacity:.45;cursor:not-allowed}
+    .badge{background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:10px;color:var(--muted);font-size:13px}
+    .message{margin-top:12px;padding:12px;border-radius:10px;display:none;font-weight:700;opacity:0;transition:opacity .25s}
+    .ok{background:rgba(48,209,88,0.12);color:var(--success)}
+    .bad{background:rgba(255,69,58,0.08);color:var(--danger)}
+    .meta{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;color:var(--muted);font-size:13px}
+    #startBtn{font-size:15px;padding:12px 18px}
+    @media (max-width:700px){
+      #vf-container{min-height:150px}
+      select{min-width:140px}
+      .controls-wrap{flex-direction:column;align-items:stretch}
+    }
+  </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="card">
-    <div class="header">
-      <div class="title">
-        <h1>Entrenador d’Intervals Musicals</h1>
-        <div class="lead">Rang A3 → G5 · sostenidors i bemolls aleatoris · practica infinitament</div>
-      </div>
-      <div class="top-actions">
-        <button id="startBtn" class="primary">Inicia Exercici</button>
-      </div>
-    </div>
-
-    <div id="vf-container" aria-hidden="false"></div>
-
-    <div class="controls-wrap">
-      <div class="controls">
-        <select id="intervalSelect" aria-label="Interval"></select>
-        <select id="dirSelect" aria-label="Direcció">
-          <option value="asc">Ascendent</option>
-          <option value="desc">Descendent</option>
-        </select>
-
-        <button id="confirmBtn" class="primary">Confirma</button>
-        <button id="nextBtn" class="ghost">Següent</button>
+  <div class="wrap">
+    <div class="card">
+      <div class="header">
+        <div>
+          <h1>Entrenador d’Intervals Musicals</h1>
+          <div class="lead">Rang A3 → G5 · sostenidors i bemolls aleatoris · practica infinitament</div>
+        </div>
+        <div>
+          <button id="startBtn" class="primary">Inicia Exercici</button>
+        </div>
       </div>
 
-      <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
-        <div style="font-size:13px;color:var(--muted)">Temps:</div>
-        <div id="timer" class="badge">20s</div>
+      <div id="vf-container" aria-hidden="false"></div>
+
+      <div class="controls-wrap">
+        <div class="controls">
+          <select id="intervalSelect" aria-label="Interval"></select>
+          <select id="dirSelect" aria-label="Direcció">
+            <option value="asc">Ascendent</option>
+            <option value="desc">Descendent</option>
+          </select>
+
+          <button id="confirmBtn" class="primary">Confirma</button>
+          <button id="nextBtn" class="ghost">Següent</button>
+        </div>
+
+        <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+          <div style="font-size:13px;color:var(--muted)">Temps:</div>
+          <div id="timer" class="badge">20s</div>
+        </div>
       </div>
-    </div>
 
-    <div id="message" class="message"></div>
+      <div id="message" class="message"></div>
 
-    <div class="meta">
-      <div>Intents: <span id="attempts" class="badge">0</span></div>
-      <div>Encerts: <span id="correct" class="badge">0</span></div>
+      <div class="meta">
+        <div>Intents: <span id="attempts" class="badge">0</span></div>
+        <div>Encerts: <span id="correct" class="badge">0</span></div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- VexFlow -->
-<script src="https://unpkg.com/vexflow@4.2.5/build/cjs/vexflow.js"></script>
-<script>
-/* ---------- v14 robust: base de dades de notes + render fiable ---------- */
-/* Revisat x3: lògica de selecció, render (VexFlow), acciddentals, timer, bloqueig. */
+  <!-- VexFlow (cjs build) -->
+  <script src="https://unpkg.com/vexflow@4.2.5/build/cjs/vexflow.js"></script>
+  <script>
+  /* ---------------- v13+ final: base NOTES (A3..G5), rendering robust, timer, lock, UI en cat ---------------- */
 
-const VF = Vex.Flow;
+  const VF = Vex.Flow;
 
-// Config
-const MIN_MIDI = 57; // A3
-const MAX_MIDI = 79; // G5
-const START_TIME = 20;
+  // Config
+  const START_TIME = 20;
 
-// Intervals (Català). 'tones' es només per mostrar.
-const INTERVALS = [
-  {semitones:0,name:'Uníson',tones:'0'},
-  {semitones:1,name:'2a menor',tones:'½'},
-  {semitones:2,name:'2a major',tones:'1'},
-  {semitones:3,name:'3a menor',tones:'1½'},
-  {semitones:4,name:'3a major',tones:'2'},
-  {semitones:5,name:'4a justa',tones:'2½'},
-  {semitones:6,name:'Tritó',tones:'3'},
-  {semitones:7,name:'5a justa',tones:'3½'},
-  {semitones:8,name:'6a menor',tones:'4'},
-  {semitones:9,name:'6a major',tones:'4½'},
-  {semitones:10,name:'7a menor',tones:'5'},
-  {semitones:11,name:'7a major',tones:'5½'},
-  {semitones:12,name:'Octava',tones:'6'}
-];
+  // INTERVALS (català, tons visibles)
+  const INTERVALS = [
+    {semitones:0,name:'Uníson',tones:'0'},
+    {semitones:1,name:'2a menor',tones:'½'},
+    {semitones:2,name:'2a major',tones:'1'},
+    {semitones:3,name:'3a menor',tones:'1½'},
+    {semitones:4,name:'3a major',tones:'2'},
+    {semitones:5,name:'4a justa',tones:'2½'},
+    {semitones:6,name:'Tritó',tones:'3'},
+    {semitones:7,name:'5a justa',tones:'3½'},
+    {semitones:8,name:'6a menor',tones:'4'},
+    {semitones:9,name:'6a major',tones:'4½'},
+    {semitones:10,name:'7a menor',tones:'5'},
+    {semitones:11,name:'7a major',tones:'5½'},
+    {semitones:12,name:'Octava',tones:'6'}
+  ];
 
-// Base de dades de notes amb enharmòniques (A3..G5).
-// Cada entrada té: displayName (per debugging), letter, accidental (null|'#'|'b'), octave, semitones
-const NOTES = [
-  // 57 A3
-  {display:'A3', letter:'A', acc:null, oct:3, sem:57},
-  // 58 A#3 / Bb3
-  {display:'A#3', letter:'A', acc:'#', oct:3, sem:58},
-  {display:'Bb3', letter:'B', acc:'b', oct:3, sem:58},
-  // 59 B3
-  {display:'B3', letter:'B', acc:null, oct:3, sem:59},
-  // 60 C4
-  {display:'C4', letter:'C', acc:null, oct:4, sem:60},
-  // 61 C#4 / Db4
-  {display:'C#4', letter:'C', acc:'#', oct:4, sem:61},
-  {display:'Db4', letter:'D', acc:'b', oct:4, sem:61},
-  // 62 D4
-  {display:'D4', letter:'D', acc:null, oct:4, sem:62},
-  // 63 D#4 / Eb4
-  {display:'D#4', letter:'D', acc:'#', oct:4, sem:63},
-  {display:'Eb4', letter:'E', acc:'b', oct:4, sem:63},
-  // 64 E4
-  {display:'E4', letter:'E', acc:null, oct:4, sem:64},
-  // 65 F4
-  {display:'F4', letter:'F', acc:null, oct:4, sem:65},
-  // 66 F#4 / Gb4
-  {display:'F#4', letter:'F', acc:'#', oct:4, sem:66},
-  {display:'Gb4', letter:'G', acc:'b', oct:4, sem:66},
-  // 67 G4
-  {display:'G4', letter:'G', acc:null, oct:4, sem:67},
-  // 68 G#4 / Ab4
-  {display:'G#4', letter:'G', acc:'#', oct:4, sem:68},
-  {display:'Ab4', letter:'A', acc:'b', oct:4, sem:68},
-  // 69 A4
-  {display:'A4', letter:'A', acc:null, oct:4, sem:69},
-  // 70 A#4 / Bb4
-  {display:'A#4', letter:'A', acc:'#', oct:4, sem:70},
-  {display:'Bb4', letter:'B', acc:'b', oct:4, sem:70},
-  // 71 B4
-  {display:'B4', letter:'B', acc:null, oct:4, sem:71},
-  // 72 C5
-  {display:'C5', letter:'C', acc:null, oct:5, sem:72},
-  // 73 C#5 / Db5
-  {display:'C#5', letter:'C', acc:'#', oct:5, sem:73},
-  {display:'Db5', letter:'D', acc:'b', oct:5, sem:73},
-  // 74 D5
-  {display:'D5', letter:'D', acc:null, oct:5, sem:74},
-  // 75 D#5 / Eb5
-  {display:'D#5', letter:'D', acc:'#', oct:5, sem:75},
-  {display:'Eb5', letter:'E', acc:'b', oct:5, sem:75},
-  // 76 E5
-  {display:'E5', letter:'E', acc:null, oct:5, sem:76},
-  // 77 F5
-  {display:'F5', letter:'F', acc:null, oct:5, sem:77},
-  // 78 F#5 / Gb5
-  {display:'F#5', letter:'F', acc:'#', oct:5, sem:78},
-  {display:'Gb5', letter:'G', acc:'b', oct:5, sem:78},
-  // 79 G5
-  {display:'G5', letter:'G', acc:null, oct:5, sem:79}
-];
+  // NOTES DB: A3 (57) .. G5 (79) values: semitone numbers relative to MIDI mapping used previously.
+  // We'll store semitone as absolute number for comparisons (consistent with earlier code).
+  // Note: sem values chosen to be continuous and match previous MIN/MAX used (57..79).
+  const NOTES = [
+    {display:'A3', letter:'A', acc:null, oct:3, sem:57},
+    {display:'A#3', letter:'A', acc:'#', oct:3, sem:58},
+    {display:'Bb3', letter:'B', acc:'b', oct:3, sem:58},
+    {display:'B3', letter:'B', acc:null, oct:3, sem:59},
+    {display:'C4', letter:'C', acc:null, oct:4, sem:60},
+    {display:'C#4', letter:'C', acc:'#', oct:4, sem:61},
+    {display:'Db4', letter:'D', acc:'b', oct:4, sem:61},
+    {display:'D4', letter:'D', acc:null, oct:4, sem:62},
+    {display:'D#4', letter:'D', acc:'#', oct:4, sem:63},
+    {display:'Eb4', letter:'E', acc:'b', oct:4, sem:63},
+    {display:'E4', letter:'E', acc:null, oct:4, sem:64},
+    {display:'F4', letter:'F', acc:null, oct:4, sem:65},
+    {display:'F#4', letter:'F', acc:'#', oct:4, sem:66},
+    {display:'Gb4', letter:'G', acc:'b', oct:4, sem:66},
+    {display:'G4', letter:'G', acc:null, oct:4, sem:67},
+    {display:'G#4', letter:'G', acc:'#', oct:4, sem:68},
+    {display:'Ab4', letter:'A', acc:'b', oct:4, sem:68},
+    {display:'A4', letter:'A', acc:null, oct:4, sem:69},
+    {display:'A#4', letter:'A', acc:'#', oct:4, sem:70},
+    {display:'Bb4', letter:'B', acc:'b', oct:4, sem:70},
+    {display:'B4', letter:'B', acc:null, oct:4, sem:71},
+    {display:'C5', letter:'C', acc:null, oct:5, sem:72},
+    {display:'C#5', letter:'C', acc:'#', oct:5, sem:73},
+    {display:'Db5', letter:'D', acc:'b', oct:5, sem:73},
+    {display:'D5', letter:'D', acc:null, oct:5, sem:74},
+    {display:'D#5', letter:'D', acc:'#', oct:5, sem:75},
+    {display:'Eb5', letter:'E', acc:'b', oct:5, sem:75},
+    {display:'E5', letter:'E', acc:null, oct:5, sem:76},
+    {display:'F5', letter:'F', acc:null, oct:5, sem:77},
+    {display:'F#5', letter:'F', acc:'#', oct:5, sem:78},
+    {display:'Gb5', letter:'G', acc:'b', oct:5, sem:78},
+    {display:'G5', letter:'G', acc:null, oct:5, sem:79}
+  ];
 
-// Estat app
-const app = {
-  midiA: null,
-  midiB: null,
-  currentSemitones: null,
-  currentDir: null,
-  attempts: 0,
-  correct: 0,
-  timer: null,
-  startTime: null,
-  renderer: null,
-  context: null,
-  lock: false,            // impedeix dobles loadQuestion simultanis
-  pendingLoad: null,      // timeout id per a següent automàtic
-  lastPairs: []
-};
+  // Application state
+  const app = {
+    n1: null,
+    n2: null,
+    currentSemitones: null,
+    currentDir: null,
+    attempts: 0,
+    correct: 0,
+    timer: null,
+    startTime: null,
+    lock: false,
+    pendingLoad: null,
+    lastPairs: []
+  };
 
-/* ---------- utilitats ---------- */
-function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
-function getRandomNoteEntry(){
-  return NOTES[randInt(0, NOTES.length-1)];
-}
+  // UI refs
+  const vfContainer = document.getElementById('vf-container');
+  const intervalSelect = document.getElementById('intervalSelect');
+  const dirSelect = document.getElementById('dirSelect');
+  const timerEl = document.getElementById('timer');
+  const messageEl = document.getElementById('message');
+  const attemptsEl = document.getElementById('attempts');
+  const correctEl = document.getElementById('correct');
+  const startBtn = document.getElementById('startBtn');
+  const confirmBtn = document.getElementById('confirmBtn');
+  const nextBtn = document.getElementById('nextBtn');
 
-/* ---------- UI references ---------- */
-const intervalSelect = document.getElementById('intervalSelect');
-const dirSelect = document.getElementById('dirSelect');
-const timerEl = document.getElementById('timer');
-const messageEl = document.getElementById('message');
-const attemptsEl = document.getElementById('attempts');
-const correctEl = document.getElementById('correct');
-const startBtn = document.getElementById('startBtn');
-const confirmBtn = document.getElementById('confirmBtn');
-const nextBtn = document.getElementById('nextBtn');
-const vfContainer = document.getElementById('vf-container');
+  /* ---------- helpers ---------- */
+  function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+  function getRandomNoteEntry(){ return NOTES[randInt(0, NOTES.length-1)]; }
 
-/* ---------- build dropdown intervals (Català) ---------- */
-function buildIntervalOptions(){
-  intervalSelect.innerHTML = '';
-  INTERVALS.forEach(i=>{
-    const opt = document.createElement('option');
-    opt.value = i.semitones;
-    // mostrar "1 1/2 tons" format: usar i.tones (ja en format '1½' o '½')
-    opt.textContent = `${i.name} (${i.tones} tons)`;
-    intervalSelect.appendChild(opt);
-  });
-}
+  /* ---------- build interval dropdown ---------- */
+  function buildIntervalOptions(){
+    intervalSelect.innerHTML = '';
+    INTERVALS.forEach(i=>{
+      const opt = document.createElement('option');
+      opt.value = i.semitones;
+      opt.textContent = `${i.name} (${i.tones} tons)`;
+      intervalSelect.appendChild(opt);
+    });
+  }
 
-/* ---------- generador d'interval complet (selecciona notes de NOTES) ---------- */
-function generateInterval(){
-  // Return object:
-  // {n1: {entry}, n2:{entry}, semitones:int, dir:'asc'|'desc'}
-  let attempts = 0;
-  let n1, n2, diff;
-  do {
-    attempts++;
-    n1 = getRandomNoteEntry();
-    n2 = getRandomNoteEntry();
-    diff = Math.abs(n2.sem - n1.sem);
-    // si és la mateixa entrada (mateixa spelling) podem acceptar (uníson)
-    // però exigim diff <= 12 (una octava com a màxim)
-    if (attempts > 200) break; // fallback per evitar bucle infinit
-  } while (diff > 12 || app.lastPairs.includes(`${n1.display}|${n2.display}`)); // evita repeticions immediates
+  /* ---------- generate interval from DB ---------- */
+  function generateInterval(){
+    let attempts = 0;
+    let n1, n2, diff;
+    do {
+      n1 = getRandomNoteEntry();
+      n2 = getRandomNoteEntry();
+      diff = Math.abs(n2.sem - n1.sem);
+      attempts++;
+      if (attempts > 300) break; // fallback
+    } while (diff > 12 || app.lastPairs.includes(`${n1.display}|${n2.display}`));
 
-  // emmagatzemar en lastPairs (mida limitada)
-  app.lastPairs.push(`${n1.display}|${n2.display}`);
-  if (app.lastPairs.length > 12) app.lastPairs.shift();
+    app.lastPairs.push(`${n1.display}|${n2.display}`);
+    if (app.lastPairs.length > 14) app.lastPairs.shift();
 
-  const dir = (n2.sem > n1.sem) ? 'asc' : (n2.sem < n1.sem ? 'desc' : 'asc'); // per uníson considerem asc
-  return { n1, n2, semitones: diff, dir };
-}
+    const dir = (n2.sem > n1.sem) ? 'asc' : (n2.sem < n1.sem ? 'desc' : 'asc');
+    return { n1, n2, semitones: diff, dir };
+  }
 
-/* ---------- render fiable: generem tot l'interval abans, després dibuixem ---------- */
-function renderIntervalObject(interval){
-  // interval.n1, interval.n2 contenen .letter, .acc, .oct, .sem, .display
-  // netejar vfContainer per forçar render net
-  vfContainer.innerHTML = '';
+  /* ---------- render interval (create renderer cleanly each time) ---------- */
+  function renderIntervalObject(interval){
+    // clean container
+    vfContainer.innerHTML = '';
 
-  // crear renderer nou i stave (això és robust i evita acumulacions problemàtiques)
-  app.renderer = new VF.Renderer(vfContainer, VF.Renderer.Backends.SVG);
-  app.renderer.resize(Math.min(760, Math.max(420, vfContainer.clientWidth)), 180);
-  app.context = app.renderer.getContext();
+    // create renderer sized to container width
+    const width = Math.min(820, Math.max(420, vfContainer.clientWidth));
+    const renderer = new VF.Renderer(vfContainer, VF.Renderer.Backends.SVG);
+    renderer.resize(width, 200);
+    const context = renderer.getContext();
 
-  const stave = new VF.Stave(10, 40, app.renderer.width - 20);
-  stave.addClef('treble').setContext(app.context).draw();
+    // stave
+    const stave = new VF.Stave(10, 40, width - 20);
+    stave.addClef('treble').setContext(context).draw();
 
-  // funció per construir key string i aplicar accidental
-  function staveNoteFromEntry(entry){
-    // key sense accidental: letter lower + '/' + octave
-    const key = `${entry.letter.toLowerCase()}/${entry.oct}`;
-    const note = new VF.StaveNote({clef:'treble', keys:[key], duration:'q'});
-    if (entry.acc) {
-      // aplicar accidental correctament
-      note.addAccidental(0, new VF.Accidental(entry.acc));
+    // helper to create stave note from entry
+    function staveNoteFromEntry(entry){
+      // key must be lower-case letter + '/' + octave
+      const key = `${entry.letter.toLowerCase()}/${entry.oct}`;
+      const note = new VF.StaveNote({ clef:'treble', keys:[key], duration:'q' });
+      if (entry.acc) {
+        // apply accidental (use addAccidental for correctness)
+        note.addAccidental(0, new VF.Accidental(entry.acc));
+      }
+      return note;
     }
-    return note;
+
+    const note1 = staveNoteFromEntry(interval.n1);
+    const note2 = staveNoteFromEntry(interval.n2);
+
+    const voice = new VF.Voice({ num_beats: 2, beat_value: 4 });
+    voice.addTickables([note1, note2]);
+
+    new VF.Formatter().joinVoices([voice]).format([voice], width - 120);
+    voice.draw(context, stave);
+
+    // save state values for validation
+    app.n1 = interval.n1;
+    app.n2 = interval.n2;
+    app.currentSemitones = interval.semitones;
+    app.currentDir = interval.dir;
   }
 
-  const note1 = staveNoteFromEntry(interval.n1);
-  const note2 = staveNoteFromEntry(interval.n2);
-
-  const voice = new VF.Voice({num_beats:2, beat_value:4});
-  voice.addTickables([note1, note2]);
-
-  // formatejar i dibuixar
-  new VF.Formatter().joinVoices([voice]).format([voice], app.renderer.width - 80);
-  voice.draw(app.context, stave);
-
-  // guardar estat per validar
-  app.midiA = interval.n1.sem;
-  app.midiB = interval.n2.sem;
-  app.currentSemitones = interval.semitones;
-  app.currentDir = interval.dir;
-}
-
-/* ---------- lock + scheduling helpers ---------- */
-function clearPendingLoad(){
-  if (app.pendingLoad) { clearTimeout(app.pendingLoad); app.pendingLoad = null; }
-}
-function scheduleLoad(delay = 0){
-  clearPendingLoad();
-  // Si hi ha un lock en marxa, schedule a delay (sempre es repeteix)
-  app.pendingLoad = setTimeout(()=>{
-    app.pendingLoad = null;
-    loadQuestion();
-  }, delay);
-}
-
-/* ---------- loadQuestion (centralitzat, protegir amb lock) ---------- */
-function loadQuestion(){
-  if (app.lock) return;       // evita crides concurrents
-  app.lock = true;
-  try {
-    // netejar timers i pending
-    clearTimer();
+  /* ---------- scheduling + lock helpers ---------- */
+  function clearPendingLoad(){
+    if (app.pendingLoad) { clearTimeout(app.pendingLoad); app.pendingLoad = null; }
+  }
+  function scheduleLoad(ms = 0){
     clearPendingLoad();
-
-    // generar interval complet
-    const interval = generateInterval();
-
-    // render (creem tot el renderer netament)
-    renderIntervalObject(interval);
-
-    // netejar missatge UI
-    hideMessage();
-
-    // reset controls visuals si cal
-    intervalSelect.selectedIndex = 0;
-    dirSelect.value = 'asc';
-
-    // començar timer
-    app.startTime = Date.now();
-    updateTimerDisplay(START_TIME);
-    startTimer();
-
-  } finally {
-    // Alliberar lock només després d'un petit tick, per evitar reentrades instantànies
-    // posem un microtimeout per assegurar que la UI estigui inicialitzada
-    setTimeout(()=>{ app.lock = false; }, 50);
+    app.pendingLoad = setTimeout(()=>{
+      app.pendingLoad = null;
+      loadQuestion();
+    }, ms);
   }
-}
 
-/* ---------- Timer ---------- */
-function updateTimerDisplay(rem){
-  timerEl.textContent = rem + 's';
-  timerEl.style.background = rem <= 5 ? 'var(--danger)' : 'transparent';
-}
-function startTimer(){
-  clearTimer();
-  app.timer = setInterval(()=>{
-    const rem = Math.max(0, START_TIME - Math.floor((Date.now() - app.startTime) / 1000));
-    updateTimerDisplay(rem);
-    if (rem <= 0) {
+  /* ---------- load question (central function, protected by lock) ---------- */
+  function loadQuestion(){
+    if (app.lock) return;
+    app.lock = true;
+    try {
+      // cleanup
       clearTimer();
-      onTimeUp();
+      clearPendingLoad();
+
+      // generate and render
+      const interval = generateInterval();
+      renderIntervalObject(interval);
+
+      // UI reset
+      hideMessage();
+      intervalSelect.selectedIndex = 0;
+      dirSelect.value = 'asc';
+
+      // start timer
+      app.startTime = Date.now();
+      updateTimerDisplay(START_TIME);
+      startTimer();
+
+    } finally {
+      // small delay before releasing lock to avoid re-entrancy
+      setTimeout(()=>{ app.lock = false; }, 60);
     }
-  }, 120); // 120ms suficient
-}
-function clearTimer(){
-  if (app.timer) { clearInterval(app.timer); app.timer = null; }
-}
+  }
 
-/* ---------- Respostes i validació ---------- */
-function evaluateAnswer(){
-  // No permetre doble click que trenqui flux
-  if (app.lock) return;
-  app.lock = true;
-  try {
-    clearPendingLoad();
+  /* ---------- Timer (Date.now based) ---------- */
+  function updateTimerDisplay(rem){
+    timerEl.textContent = rem + 's';
+    timerEl.style.background = rem <= 5 ? 'var(--danger)' : 'transparent';
+  }
+  function startTimer(){
     clearTimer();
+    app.timer = setInterval(()=>{
+      const rem = Math.max(0, START_TIME - Math.floor((Date.now() - app.startTime)/1000));
+      updateTimerDisplay(rem);
+      if (rem <= 0) {
+        clearTimer();
+        onTimeUp();
+      }
+    }, 120);
+  }
+  function clearTimer(){ if (app.timer){ clearInterval(app.timer); app.timer = null; } }
 
-    const selS = parseInt(intervalSelect.value, 10);
-    const selDir = dirSelect.value;
-    const diff = app.midiB - app.midiA;
+  /* ---------- validate answer ---------- */
+  function evaluateAnswer(){
+    if (app.lock) return;
+    app.lock = true;
+    try {
+      clearPendingLoad();
+      clearTimer();
+
+      const selS = parseInt(intervalSelect.value, 10);
+      const selDir = dirSelect.value;
+      const diff = app.n2.sem - app.n1.sem;
+      const semAbs = Math.abs(diff);
+      const dir = diff > 0 ? 'asc' : (diff < 0 ? 'desc' : 'asc');
+
+      app.attempts++;
+      attemptsEl.textContent = app.attempts;
+
+      const correctSem = selS === semAbs;
+      const correctDir = semAbs === 0 ? true : (selDir === dir);
+
+      if (correctSem && correctDir) {
+        app.correct++;
+        correctEl.textContent = app.correct;
+        showMessage('Correcte!', true);
+        confirmBtn.style.background = 'var(--success)';
+        scheduleLoad(600);
+      } else {
+        showMessage(`Incorrecte. Correcte: ${INTERVALS[semAbs].name} (${INTERVALS[semAbs].tones} tons), ${dir === 'asc' ? 'ascendent' : 'descendent'}`, false);
+        confirmBtn.style.background = 'var(--danger)';
+        setTimeout(()=>{ confirmBtn.style.background = ''; }, 550);
+        scheduleLoad(1500);
+      }
+    } finally {
+      setTimeout(()=>{ app.lock = false; }, 80);
+    }
+  }
+
+  /* ---------- time up ---------- */
+  function onTimeUp(){
+    const diff = app.n2.sem - app.n1.sem;
     const semAbs = Math.abs(diff);
     const dir = diff > 0 ? 'asc' : (diff < 0 ? 'desc' : 'asc');
-
     app.attempts++;
     attemptsEl.textContent = app.attempts;
+    showMessage(`S'ha acabat el temps. Correcte: ${INTERVALS[semAbs].name} (${INTERVALS[semAbs].tones} tons), ${dir === 'asc' ? 'ascendent' : 'descendent'}`, false);
+    scheduleLoad(1500);
+  }
 
-    const correctSem = selS === semAbs;
-    const correctDir = semAbs === 0 ? true : (selDir === dir);
+  /* ---------- UI messaging ---------- */
+  function showMessage(txt, ok=true){
+    messageEl.textContent = txt;
+    messageEl.className = 'message ' + (ok ? 'ok' : 'bad');
+    messageEl.style.display = 'block';
+    setTimeout(()=>{ messageEl.style.opacity = 1; }, 20);
+    setTimeout(()=>{ messageEl.style.opacity = 0; setTimeout(()=>{ messageEl.style.display = 'none'; }, 300); }, 2200);
+  }
+  function hideMessage(){ messageEl.style.opacity = 0; messageEl.style.display = 'none'; }
 
-    if (correctSem && correctDir) {
-      app.correct++;
-      correctEl.textContent = app.correct;
-      showMessage('Correcte!', true);
-      confirmBtn.style.background = 'var(--success)';
-      // programar següent net
-      scheduleLoad(600);
-    } else {
-      showMessage(`Incorrecte. Correcte: ${INTERVALS[semAbs].name} (${INTERVALS[semAbs].tones} tons), ${dir==='asc'?'ascendent':'descendent'}`, false);
-      confirmBtn.style.background = 'var(--danger)';
-      // reactivar el botó confirm color després
-      setTimeout(()=>{ confirmBtn.style.background = ''; }, 550);
-      // programem el següent automàticament després d'un breu delay
-      scheduleLoad(1500);
+  /* ---------- events ---------- */
+  buildIntervalOptions();
+
+  confirmBtn.addEventListener('click', ()=> evaluateAnswer());
+  nextBtn.addEventListener('click', ()=>{
+    if (app.lock) return;
+    clearPendingLoad();
+    clearTimer();
+    loadQuestion();
+  });
+  startBtn.addEventListener('click', ()=>{
+    startBtn.classList.add('disabled');
+    startBtn.disabled = true;
+    loadQuestion();
+  });
+
+  /* ---------- window resize: re-render current interval clean (if any) ---------- */
+  window.addEventListener('resize', ()=>{
+    if (!app.lock && app.n1 && app.n2) {
+      try {
+        renderIntervalObject({ n1: app.n1, n2: app.n2, semitones: app.currentSemitones, dir: app.currentDir });
+      } catch(e){ /* ignore render resize errors */ }
     }
-  } finally {
-    // alliberem lock però deixem un marge curt
-    setTimeout(()=>{ app.lock = false; }, 80);
-  }
-}
+  });
 
-/* ---------- Timeout (s'ha acabat el temps) ---------- */
-function onTimeUp(){
-  // no cridem loadQuestion directament: use scheduleLoad per centralitzar temps
-  const diff = app.midiB - app.midiA;
-  const semAbs = Math.abs(diff);
-  const dir = diff > 0 ? 'asc' : (diff < 0 ? 'desc' : 'asc');
-  app.attempts++;
-  attemptsEl.textContent = app.attempts;
-  showMessage(`S'ha acabat el temps. Correcte: ${INTERVALS[semAbs].name} (${INTERVALS[semAbs].tones} tons), ${dir==='asc'?'ascendent':'descendent'}`, false);
-  scheduleLoad(1500);
-}
-
-/* ---------- Missatges UI ---------- */
-function showMessage(txt, ok = true){
-  messageEl.textContent = txt;
-  messageEl.className = 'message ' + (ok ? 'ok' : 'bad');
-  messageEl.style.display = 'block';
-  setTimeout(()=>{ messageEl.style.opacity = 1; }, 20);
-  // desapareix automàticament (i es manté durant el temps perquè user vegi)
-  setTimeout(()=>{ messageEl.style.opacity = 0; setTimeout(()=>{ messageEl.style.display = 'none'; }, 300); }, 2200);
-}
-function hideMessage(){ messageEl.style.opacity = 0; messageEl.style.display = 'none'; }
-
-/* ---------- Event bindings ---------- */
-buildIntervalOptions();
-
-confirmBtn.addEventListener('click', ()=>{
-  evaluateAnswer();
-});
-nextBtn.addEventListener('click', ()=>{
-  // El botó Següent força un nou exercici immediatament (si no hi ha lock)
-  if (app.lock) return;
-  // assegura no tenir pending load i netejar timer
-  clearPendingLoad();
-  clearTimer();
-  loadQuestion();
-});
-startBtn.addEventListener('click', ()=>{
-  // init first question
-  startBtn.classList.add('disabled');
-  startBtn.disabled = true;
-  loadQuestion();
-});
-
-/* ---------- petit fallback: reajustar renderer quan canvas canvia de mida ---------- */
-window.addEventListener('resize', ()=>{
-  // si hi ha un renderer actiu, re-render l'últim exercici (si hi ha)
-  // En lloc de redibuixar notes, simplement recridem loadQuestion si no bloquejat
-  // això és segur perquè loadQuestion crea un renderer net
-  // NO volem recrear l'exercici si hi ha un lock o timer corrent (no tocar).
-  // Només re-render si no hi ha lock i s'ha iniciat abans.
-  if (!app.lock && app.midiA !== null) {
-    // re-render actual (crear un objecte interval a partir de l'estat actual)
-    // trobem entries a partir del semitone guardat; pot haver-hi múltiples enharmòniques:
-    // cerquem una entry amb matching semitones i pantilla (preferim la que coincideixi amb la display usada la darrera vegada)
-    // Per robustesa creem interval a partir d'últim estat: recompute find
-    const n1 = NOTES.find(n => n.sem === app.midiA) || NOTES[0];
-    const n2 = NOTES.find(n => n.sem === app.midiB) || NOTES[0];
-    const interval = { n1, n2, semitones: app.currentSemitones, dir: app.currentDir };
-    try { renderIntervalObject(interval); } catch(e){ /* no fatal */ }
-  }
-});
-</script>
+  /* ---------- initial state ---------- */
+  // Show interval options now
+  // Note: we do not auto-start; user presses "Inicia Exercici"
+  </script>
 </body>
 </html>
