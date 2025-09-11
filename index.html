@@ -276,8 +276,6 @@ button.disabled{
         <span id="accuracy" class="badge">--</span>
       </div>
     </div>
-    
-   
   </div>
 </div>
 
@@ -385,8 +383,7 @@ const elements = {
   confirmBtn: document.getElementById('confirmBtn'),
   nextBtn: document.getElementById('nextBtn'),
   loadingIndicator: document.getElementById('loading-indicator'),
-  noVexflow: document.getElementById('no-vexflow'),
-  debugInfo: document.getElementById('debug-info')
+  noVexflow: document.getElementById('no-vexflow')
 };
 
 // Utilitats
@@ -432,7 +429,6 @@ function showMessage(text, isSuccess, duration = 2500) {
     }, 250);
   }, duration);
 }
-
 
 // Inicialització dels intervals
 function buildIntervalOptions() {
@@ -573,8 +569,6 @@ function generateInterval() {
     elements.loadingIndicator.style.display = 'none';
     AppState.isLocked = false;
     
-
-    
     return true;
     
   } catch (error) {
@@ -623,11 +617,18 @@ function handleTimeout() {
   } else {
     showMessage('⏰ Temps esgotat!', false);
   }
+  
+  // Desactivar botó de confirmar quan s'acaba el temps
+  elements.confirmBtn.disabled = true;
+  elements.confirmBtn.classList.add('disabled');
 }
 
 // Event handlers
 function handleConfirm() {
   if (AppState.isLocked || !AppState.currentPair) return;
+  
+  // Aturar el temporitzador quan es confirma
+  clearInterval(AppState.timer);
   
   AppState.attempts++;
   elements.attempts.textContent = AppState.attempts;
@@ -642,10 +643,17 @@ function handleConfirm() {
     AppState.correct++;
     elements.correct.textContent = AppState.correct;
     showMessage('🎉 Correcte!', true);
+    
+    // Desactivar botons fins que es premi "Següent"
+    elements.confirmBtn.disabled = true;
+    elements.confirmBtn.classList.add('disabled');
   } else {
     const actualInterval = INTERVALS.find(i => i.semitones === AppState.currentPair.semitones);
     const directionText = AppState.currentPair.direction === 'asc' ? 'Ascendent' : 'Descendent';
     showMessage(`❌ Incorrecte! Era: ${actualInterval.emoji} ${actualInterval.name} ${directionText}`, false);
+    
+    // Reiniciar el temporitzador si és incorrecte
+    startTimer();
   }
   
   updateAccuracy();
@@ -654,9 +662,16 @@ function handleConfirm() {
 function handleNext() {
   if (AppState.isLocked) return;
   
+  // Aturar qualsevol temporitzador actiu
+  clearInterval(AppState.timer);
+  
   const success = generateInterval();
   if (success) {
     startTimer();
+    
+    // Reactivar botó de confirmar
+    elements.confirmBtn.disabled = false;
+    elements.confirmBtn.classList.remove('disabled');
   }
 }
 
@@ -756,7 +771,5 @@ buildIntervalOptions();
 
 document.head.appendChild(script);
 </script>
- <footer>2025 - Eugeni Corchero</footer> 
-  
 </body>
 </html>
