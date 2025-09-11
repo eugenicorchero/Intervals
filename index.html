@@ -433,14 +433,6 @@ function showMessage(text, isSuccess, duration = 2500) {
   }, duration);
 }
 
-function showDebugInfo(info) {
-  if (!elements.debugInfo) return;
-  elements.debugInfo.textContent = info;
-  elements.debugInfo.style.display = 'block';
-  setTimeout(() => {
-    elements.debugInfo.style.display = 'none';
-  }, 3000);
-}
 
 // Inicialització dels intervals
 function buildIntervalOptions() {
