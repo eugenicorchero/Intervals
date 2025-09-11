@@ -3,38 +3,221 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Entrenador d’Intervals Musicals</title>
+<title>Entrenador d'Intervals Musicals v14</title>
 <style>
 :root{
   --bg:#0f1114; --card:#181a1d; --panel:#0b0b0c; --text:#e6edf3;
   --muted:#9aa4ad; --primary:#0A84FF; --primary-hover:#339CFF;
   --success:#30D158; --danger:#FF453A; --white-note-bg:#ffffff;
+  --warning:#FF9F0A;
 }
-body{margin:0;font-family:Inter,system-ui,-apple-system,"Helvetica Neue",Arial;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
-.wrap{max-width:980px;margin:24px auto;padding:20px;}
-.card{background:var(--card);border-radius:14px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,0.6);}
-.header{display:flex;align-items:center;justify-content:space-between;gap:12px;}
-h1{margin:0;color:var(--primary);font-size:20px;}
-.lead{margin:6px 0 0 0;color:var(--muted);font-size:13px;}
-#vf-container{border-radius:10px;background:var(--white-note-bg);padding:12px;min-height:170px;display:flex;align-items:center;justify-content:center;margin-top:18px;}
-.controls-wrap{margin-top:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
-select,button{font-size:14px;padding:10px 14px;border-radius:10px;border:none;outline:none;}
-select{min-width:180px;background:#0f1720;color:var(--text);}
-button.primary{background:var(--primary);color:#fff;cursor:pointer;transition:all .14s;border-radius:10px;}
-button.primary:hover{background:var(--primary-hover);}
-button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text);cursor:pointer;border-radius:10px;}
-button.disabled{opacity:.45;cursor:not-allowed;}
-.badge{background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:10px;color:var(--muted);font-size:13px;}
-.message{margin-top:12px;padding:12px;border-radius:10px;display:none;font-weight:700;opacity:0;transition:opacity .25s;}
-.ok{background:rgba(48,209,88,0.12);color:var(--success);}
-.bad{background:rgba(255,69,58,0.08);color:var(--danger);}
-.meta{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;color:var(--muted);font-size:13px;}
-#startBtn{font-size:15px;padding:12px 18px;}
+body{
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,"Helvetica Neue",Arial;
+  background:var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+.wrap{
+  max-width:980px;
+  margin:24px auto;
+  padding:20px;
+  min-height:calc(100vh - 48px);
+}
+.card{
+  background:var(--card);
+  border-radius:14px;
+  padding:24px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.6);
+}
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:20px;
+}
+h1{
+  margin:0;
+  color:var(--primary);
+  font-size:20px;
+  font-weight:700;
+}
+.lead{
+  margin:6px 0 0 0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.4;
+}
+#vf-container{
+  border-radius:10px;
+  background:var(--white-note-bg);
+  padding:20px;
+  min-height:180px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:18px 0;
+  position:relative;
+  overflow:hidden;
+}
+#loading-indicator{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  color:var(--muted);
+  font-size:14px;
+  display:none;
+}
+.controls-wrap{
+  margin:16px 0;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.controls{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+  flex:1;
+}
+select,button{
+  font-size:14px;
+  padding:10px 14px;
+  border-radius:10px;
+  border:none;
+  outline:none;
+  font-family:inherit;
+}
+select{
+  min-width:180px;
+  background:#0f1720;
+  color:var(--text);
+  border:1px solid rgba(255,255,255,0.06);
+  cursor:pointer;
+}
+select:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 2px rgba(10,132,255,0.2);
+}
+button{
+  cursor:pointer;
+  transition:all .14s ease;
+  border-radius:10px;
+  font-weight:500;
+}
+button.primary{
+  background:var(--primary);
+  color:#fff;
+}
+button.primary:hover:not(.disabled){
+  background:var(--primary-hover);
+  transform:translateY(-1px);
+}
+button.ghost{
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.06);
+  color:var(--text);
+}
+button.ghost:hover:not(.disabled){
+  background:rgba(255,255,255,0.05);
+}
+button.disabled{
+  opacity:.45;
+  cursor:not-allowed;
+  transform:none !important;
+}
+.timer-section{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.badge{
+  background:rgba(255,255,255,0.03);
+  padding:6px 10px;
+  border-radius:10px;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:500;
+  min-width:35px;
+  text-align:center;
+}
+.timer-warning{
+  color:var(--warning);
+  background:rgba(255,159,10,0.1);
+}
+.timer-danger{
+  color:var(--danger);
+  background:rgba(255,69,58,0.1);
+}
+.message{
+  margin-top:12px;
+  padding:12px 16px;
+  border-radius:10px;
+  display:none;
+  font-weight:600;
+  opacity:0;
+  transition:opacity .25s ease;
+  text-align:center;
+}
+.message.ok{
+  background:rgba(48,209,88,0.12);
+  color:var(--success);
+  border:1px solid rgba(48,209,88,0.2);
+}
+.message.bad{
+  background:rgba(255,69,58,0.08);
+  color:var(--danger);
+  border:1px solid rgba(255,69,58,0.2);
+}
+.message.info{
+  background:rgba(10,132,255,0.08);
+  color:var(--primary);
+  border:1px solid rgba(10,132,255,0.2);
+}
+.meta{
+  display:flex;
+  gap:16px;
+  margin-top:20px;
+  flex-wrap:wrap;
+  color:var(--muted);
+  font-size:13px;
+  padding-top:16px;
+  border-top:1px solid rgba(255,255,255,0.06);
+}
+.meta-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+#startBtn{
+  font-size:15px;
+  padding:12px 18px;
+  font-weight:600;
+}
+.debug-info{
+  margin-top:10px;
+  padding:8px 12px;
+  background:rgba(255,255,255,0.02);
+  border-radius:6px;
+  font-size:12px;
+  color:var(--muted);
+  display:none;
+}
 @media (max-width:700px){
-  #vf-container{min-height:150px}
-  select{min-width:140px}
-  .controls-wrap{flex-direction:column;align-items:stretch}
+  .wrap{padding:12px;margin:12px auto;}
+  .card{padding:16px;}
+  .header{flex-direction:column;align-items:stretch;gap:16px;}
+  #vf-container{min-height:150px;padding:16px;}
+  select{min-width:140px;}
+  .controls-wrap{flex-direction:column;align-items:stretch;}
+  .timer-section{margin-left:0;justify-content:center;}
+  .meta{justify-content:center;}
 }
 </style>
 </head>
@@ -43,197 +226,543 @@ button.disabled{opacity:.45;cursor:not-allowed;}
   <div class="card">
     <div class="header">
       <div>
-        <h1>Entrenador d’Intervals Musicals</h1>
-        <div class="lead">Rang A3 → G5 · accidentals aleatoris · pràctica infinita</div>
+        <h1>🎵 Entrenador d'Intervals Musicals</h1>
+        <div class="lead">Identifica intervals musicals · pràctica progressiva amb feedback immediat</div>
       </div>
       <div>
         <button id="startBtn" class="primary">Inicia Exercici</button>
       </div>
     </div>
-    <div id="vf-container"></div>
+    
+    <div id="vf-container">
+      <div id="loading-indicator">Carregant partitura...</div>
+      <div id="no-vexflow" style="display:none;color:var(--danger);text-align:center;">
+        ⚠️ Error carregant VexFlow.<br>
+        <small>Comprova la connexió a Internet</small>
+      </div>
+    </div>
+    
     <div class="controls-wrap">
       <div class="controls">
-        <select id="intervalSelect"></select>
-        <select id="dirSelect">
-          <option value="asc">Ascendent</option>
-          <option value="desc">Descendent</option>
+        <select id="intervalSelect" aria-label="Selecciona interval">
+          <option value="">Carregant intervals...</option>
         </select>
-        <button id="confirmBtn" class="primary">Confirma</button>
-        <button id="nextBtn" class="ghost">Següent</button>
+        <select id="dirSelect" aria-label="Selecciona direcció">
+          <option value="asc">↗️ Ascendent</option>
+          <option value="desc">↙️ Descendent</option>
+        </select>
+        <button id="confirmBtn" class="primary" disabled>Confirma</button>
+        <button id="nextBtn" class="ghost" disabled>Següent</button>
       </div>
-      <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+      <div class="timer-section">
         <div style="font-size:13px;color:var(--muted)">Temps:</div>
-        <div id="timer" class="badge">20s</div>
+        <div id="timer" class="badge">--</div>
       </div>
     </div>
+    
     <div id="message" class="message"></div>
+    
     <div class="meta">
-      <div>Intents: <span id="attempts" class="badge">0</span></div>
-      <div>Encerts: <span id="correct" class="badge">0</span></div>
+      <div class="meta-item">
+        <span>Intents:</span>
+        <span id="attempts" class="badge">0</span>
+      </div>
+      <div class="meta-item">
+        <span>Encerts:</span>
+        <span id="correct" class="badge">0</span>
+      </div>
+      <div class="meta-item">
+        <span>Precisió:</span>
+        <span id="accuracy" class="badge">--</span>
+      </div>
     </div>
+    
+    <div id="debug-info" class="debug-info"></div>
   </div>
 </div>
 
-<script src="https://unpkg.com/vexflow@4.2.5/build/cjs/vexflow.js"></script>
 <script>
-const VF = Vex.Flow;
-const START_TIME = 20;
+// Configuració global
+const CONFIG = {
+  START_TIME: 20,
+  MAX_SEMITONES: 12,
+  MEMORY_SIZE: 8,
+  VEXFLOW_TIMEOUT: 5000
+};
+
+// Intervals definits
 const INTERVALS = [
-  {semitones:0,name:'Uníson',tones:'0'},
-  {semitones:1,name:'2a menor',tones:'½'},
-  {semitones:2,name:'2a major',tones:'1'},
-  {semitones:3,name:'3a menor',tones:'1½'},
-  {semitones:4,name:'3a major',tones:'2'},
-  {semitones:5,name:'4a justa',tones:'2½'},
-  {semitones:6,name:'Tritó',tones:'3'},
-  {semitones:7,name:'5a justa',tones:'3½'},
-  {semitones:8,name:'6a menor',tones:'4'},
-  {semitones:9,name:'6a major',tones:'4½'},
-  {semitones:10,name:'7a menor',tones:'5'},
-  {semitones:11,name:'7a major',tones:'5½'},
-  {semitones:12,name:'Octava',tones:'6'}
+  {semitones:0, name:'Uníson', tones:'0', emoji:'🎯'},
+  {semitones:1, name:'2a menor', tones:'½', emoji:'🔸'},
+  {semitones:2, name:'2a major', tones:'1', emoji:'🔹'},
+  {semitones:3, name:'3a menor', tones:'1½', emoji:'🟠'},
+  {semitones:4, name:'3a major', tones:'2', emoji:'🟡'},
+  {semitones:5, name:'4a justa', tones:'2½', emoji:'🟢'},
+  {semitones:6, name:'Tritó', tones:'3', emoji:'⚡'},
+  {semitones:7, name:'5a justa', tones:'3½', emoji:'🔵'},
+  {semitones:8, name:'6a menor', tones:'4', emoji:'🟣'},
+  {semitones:9, name:'6a major', tones:'4½', emoji:'🟤'},
+  {semitones:10, name:'7a menor', tones:'5', emoji:'⚫'},
+  {semitones:11, name:'7a major', tones:'5½', emoji:'⚪'},
+  {semitones:12, name:'Octava', tones:'6', emoji:'🎼'}
 ];
 
-// Notes DB amb accidentals
-const NOTES = [];
-const noteNames = ['A','B','C','D','E','F','G'];
-const octaves = [3,4,5];
-const semitoneMap = {'C':0,'D':2,'E':4,'F':5,'G':7,'A':9,'B':11};
-octaves.forEach(oct=>{
-  noteNames.forEach(l=>{
-    const baseSem = 12*(oct+1)+semitoneMap[l];
-    // natural
-    NOTES.push({display:`${l}${oct}`,letter:l,acc:null,oct:oct,sem:baseSem});
-    // sostingut
-    if(l!=='E' && l!=='B') NOTES.push({display:`${l}#${oct}`,letter:l,acc:'#',oct:oct,sem:baseSem+1});
-    // bemoll
-    if(l!=='C' && l!=='F') NOTES.push({display:`${l}b${oct}`,letter:l,acc:'b',oct:oct,sem:baseSem-1});
+// Base de dades de notes millorada
+function createNotesDatabase() {
+  const notes = [];
+  const noteNames = ['C','D','E','F','G','A','B'];
+  const octaves = [3,4,5];
+  const semitoneOffsets = {C:0, D:2, E:4, F:5, G:7, A:9, B:11};
+  
+  octaves.forEach(octave => {
+    noteNames.forEach(letter => {
+      const baseSemitone = 12 * (octave + 1) + semitoneOffsets[letter];
+      
+      // Nota natural
+      notes.push({
+        display: `${letter}${octave}`,
+        letter: letter,
+        accidental: null,
+        octave: octave,
+        semitone: baseSemitone,
+        vexflowKey: `${letter}/${octave}`
+      });
+      
+      // Sostingut (no per E i B)
+      if (letter !== 'E' && letter !== 'B') {
+        notes.push({
+          display: `${letter}#${octave}`,
+          letter: letter,
+          accidental: '#',
+          octave: octave,
+          semitone: baseSemitone + 1,
+          vexflowKey: `${letter}/${octave}`
+        });
+      }
+      
+      // Bemoll (no per C i F)
+      if (letter !== 'C' && letter !== 'F') {
+        notes.push({
+          display: `${letter}b${octave}`,
+          letter: letter,
+          accidental: 'b',
+          octave: octave,
+          semitone: baseSemitone - 1,
+          vexflowKey: `${letter}/${octave}`
+        });
+      }
+    });
   });
-});
-
-// Estat app
-const app={n1:null,n2:null,currentSemitones:null,currentDir:null,attempts:0,correct:0,timer:null,startTime:null,lock:false,lastPairs:[]};
-
-// UI
-const vfContainer = document.getElementById('vf-container');
-const intervalSelect = document.getElementById('intervalSelect');
-const dirSelect = document.getElementById('dirSelect');
-const timerEl = document.getElementById('timer');
-const messageEl = document.getElementById('message');
-const attemptsEl = document.getElementById('attempts');
-const correctEl = document.getElementById('correct');
-const startBtn = document.getElementById('startBtn');
-const confirmBtn = document.getElementById('confirmBtn');
-const nextBtn = document.getElementById('nextBtn');
-
-function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
-function getRandomNote(){return NOTES[randInt(0,NOTES.length-1)];}
-function buildIntervalOptions(){
-  intervalSelect.innerHTML='';
-  INTERVALS.forEach(i=>{
-    const opt=document.createElement('option');
-    opt.value=i.semitones;
-    opt.textContent=`${i.name} (${i.tones} t.)`;
-    intervalSelect.appendChild(opt);
-  });
-}
-buildIntervalOptions();
-
-function generateInterval(){
-  app.lock = true;
-  vfContainer.innerHTML = '';
-
-  const renderer = new VF.Renderer(vfContainer, VF.Renderer.Backends.SVG);
-  renderer.resize(vfContainer.clientWidth, 150);
-  const context = renderer.getContext();
-
-  const stave = new VF.Stave(10, 40, vfContainer.clientWidth - 20);
-  stave.addClef('treble').setContext(context).draw();
-
-  let n1, n2;
-  do {
-    n1 = getRandomNote();
-    n2 = getRandomNote();
-  } while(app.lastPairs.some(p => p[0]===n1.display && p[1]===n2.display) || Math.abs(n1.sem-n2.sem)>12);
-
-  app.lastPairs.push([n1.display, n2.display]);
-  if(app.lastPairs.length>10) app.lastPairs.shift();
-
-  app.n1 = n1;
-  app.n2 = n2;
-  app.currentSemitones = Math.abs(n1.sem - n2.sem);
-  app.currentDir = n1.sem < n2.sem ? 'asc':'desc';
-
-  // Crear notes
-  const vfNotes = [
-    new VF.StaveNote({ keys: [`${n1.letter}/${n1.oct}`], duration: 'q' }),
-    new VF.StaveNote({ keys: [`${n2.letter}/${n2.oct}`], duration: 'q' })
-  ];
-  if(n1.acc) vfNotes[0].addModifier(0,new VF.Accidental(n1.acc));
-  if(n2.acc) vfNotes[1].addModifier(0,new VF.Accidental(n2.acc));
-
-  const voice = new VF.Voice({ num_beats:2, beat_value:4 });
-  voice.addTickables(vfNotes);
-  new VF.Formatter().joinVoices([voice]).format([voice], vfContainer.clientWidth-60);
-  voice.draw(context, stave);
-
-  app.lock=false;
+  
+  return notes.filter(note => note.semitone >= 48 && note.semitone <= 79); // A3 a G5
 }
 
-function startTimer(){
-  clearInterval(app.timer);
-  app.startTime=START_TIME;
-  timerEl.textContent=`${START_TIME}s`;
-  app.timer=setInterval(()=>{
-    app.startTime--;
-    if(app.startTime<=0){
-      clearInterval(app.timer);
-      timerEl.textContent='0s';
-      showMessage('Temps esgotat!',false);
-    }else{
-      timerEl.textContent=`${app.startTime}s`;
+// Estat de l'aplicació
+const AppState = {
+  notes: [],
+  currentPair: null,
+  attempts: 0,
+  correct: 0,
+  timer: null,
+  timeLeft: 0,
+  isLocked: false,
+  recentPairs: [],
+  vexflowLoaded: false,
+  exerciseStarted: false
+};
+
+// Elements DOM
+const elements = {
+  vfContainer: document.getElementById('vf-container'),
+  intervalSelect: document.getElementById('intervalSelect'),
+  dirSelect: document.getElementById('dirSelect'),
+  timer: document.getElementById('timer'),
+  message: document.getElementById('message'),
+  attempts: document.getElementById('attempts'),
+  correct: document.getElementById('correct'),
+  accuracy: document.getElementById('accuracy'),
+  startBtn: document.getElementById('startBtn'),
+  confirmBtn: document.getElementById('confirmBtn'),
+  nextBtn: document.getElementById('nextBtn'),
+  loadingIndicator: document.getElementById('loading-indicator'),
+  noVexflow: document.getElementById('no-vexflow'),
+  debugInfo: document.getElementById('debug-info')
+};
+
+// Utilitats
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getRandomNote() {
+  return AppState.notes[randomInt(0, AppState.notes.length - 1)];
+}
+
+function updateAccuracy() {
+  if (AppState.attempts === 0) {
+    elements.accuracy.textContent = '--';
+    return;
+  }
+  const percentage = Math.round((AppState.correct / AppState.attempts) * 100);
+  elements.accuracy.textContent = `${percentage}%`;
+  
+  // Canviar color segons precisió
+  if (percentage >= 80) {
+    elements.accuracy.style.color = 'var(--success)';
+  } else if (percentage >= 60) {
+    elements.accuracy.style.color = 'var(--warning)';
+  } else {
+    elements.accuracy.style.color = 'var(--danger)';
+  }
+}
+
+function showMessage(text, isSuccess, duration = 2500) {
+  elements.message.textContent = text;
+  elements.message.className = `message ${isSuccess ? 'ok' : 'bad'}`;
+  elements.message.style.display = 'block';
+  
+  requestAnimationFrame(() => {
+    elements.message.style.opacity = '1';
+  });
+  
+  setTimeout(() => {
+    elements.message.style.opacity = '0';
+    setTimeout(() => {
+      elements.message.style.display = 'none';
+    }, 250);
+  }, duration);
+}
+
+function showDebugInfo(info) {
+  if (!elements.debugInfo) return;
+  elements.debugInfo.textContent = info;
+  elements.debugInfo.style.display = 'block';
+  setTimeout(() => {
+    elements.debugInfo.style.display = 'none';
+  }, 3000);
+}
+
+// Inicialització dels intervals
+function buildIntervalOptions() {
+  elements.intervalSelect.innerHTML = '';
+  
+  INTERVALS.forEach(interval => {
+    const option = document.createElement('option');
+    option.value = interval.semitones;
+    option.textContent = `${interval.emoji} ${interval.name} (${interval.tones} tons)`;
+    elements.intervalSelect.appendChild(option);
+  });
+  
+  // Seleccionar un interval aleatori per defecte
+  const randomIndex = randomInt(1, INTERVALS.length - 2); // Evitar uníson i octava
+  elements.intervalSelect.selectedIndex = randomIndex;
+}
+
+// Verificació de VexFlow
+function checkVexFlowAvailability() {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(new Error('VexFlow timeout'));
+    }, CONFIG.VEXFLOW_TIMEOUT);
+    
+    function checkVF() {
+      if (typeof Vex !== 'undefined' && Vex.Flow) {
+        clearTimeout(timeout);
+        AppState.vexflowLoaded = true;
+        resolve(true);
+      } else {
+        setTimeout(checkVF, 100);
+      }
     }
-  },1000);
+    checkVF();
+  });
 }
 
-function showMessage(txt,ok){
-  messageEl.textContent=txt;
-  messageEl.className='message '+(ok?'ok':'bad');
-  messageEl.style.display='block';
-  setTimeout(()=>{messageEl.style.opacity=1;},10);
-  setTimeout(()=>{messageEl.style.opacity=0;},1800);
+// Generació d'intervals
+function generateInterval() {
+  if (!AppState.vexflowLoaded) {
+    showMessage('VexFlow no està disponible', false);
+    return false;
+  }
+  
+  AppState.isLocked = true;
+  elements.loadingIndicator.style.display = 'block';
+  
+  try {
+    // Neteja container
+    elements.vfContainer.innerHTML = '<div id="loading-indicator">Carregant partitura...</div>';
+    elements.loadingIndicator = elements.vfContainer.querySelector('#loading-indicator');
+    
+    const containerWidth = elements.vfContainer.clientWidth;
+    const containerHeight = 150;
+    
+    // Crear renderer
+    const VF = Vex.Flow;
+    const renderer = new VF.Renderer(elements.vfContainer, VF.Renderer.Backends.SVG);
+    renderer.resize(Math.max(containerWidth, 300), containerHeight);
+    const context = renderer.getContext();
+    
+    // Crear pentagrama
+    const stave = new VF.Stave(20, 20, Math.max(containerWidth - 40, 200));
+    stave.addClef('treble').setContext(context).draw();
+    
+    // Generar parella de notes vàlida
+    let note1, note2, attempts = 0;
+    do {
+      note1 = getRandomNote();
+      note2 = getRandomNote();
+      attempts++;
+      
+      if (attempts > 50) {
+        throw new Error('No es pot generar un interval vàlid');
+      }
+    } while (
+      Math.abs(note1.semitone - note2.semitone) > CONFIG.MAX_SEMITONES ||
+      Math.abs(note1.semitone - note2.semitone) === 0 ||
+      AppState.recentPairs.some(pair => 
+        pair.note1.display === note1.display && pair.note2.display === note2.display
+      )
+    );
+    
+    // Crear notes VexFlow
+    const vfNotes = [
+      new VF.StaveNote({
+        keys: [note1.vexflowKey],
+        duration: 'q'
+      }),
+      new VF.StaveNote({
+        keys: [note2.vexflowKey],
+        duration: 'q'
+      })
+    ];
+    
+    // Afegir accidentals
+    if (note1.accidental) {
+      vfNotes[0].addModifier(new VF.Accidental(note1.accidental), 0);
+    }
+    if (note2.accidental) {
+      vfNotes[1].addModifier(new VF.Accidental(note2.accidental), 0);
+    }
+    
+    // Crear veu i formatar
+    const voice = new VF.Voice({
+      num_beats: 2,
+      beat_value: 4
+    });
+    voice.addTickables(vfNotes);
+    
+    const formatter = new VF.Formatter();
+    formatter.joinVoices([voice]).format([voice], Math.max(containerWidth - 80, 150));
+    voice.draw(context, stave);
+    
+    // Actualitzar estat
+    const semitoneDistance = Math.abs(note1.semitone - note2.semitone);
+    const direction = note1.semitone < note2.semitone ? 'asc' : 'desc';
+    
+    AppState.currentPair = {
+      note1: note1,
+      note2: note2,
+      semitones: semitoneDistance,
+      direction: direction
+    };
+    
+    // Afegir a historial
+    AppState.recentPairs.push(AppState.currentPair);
+    if (AppState.recentPairs.length > CONFIG.MEMORY_SIZE) {
+      AppState.recentPairs.shift();
+    }
+    
+    // Habilitar controls
+    elements.confirmBtn.disabled = false;
+    elements.nextBtn.disabled = false;
+    elements.confirmBtn.classList.remove('disabled');
+    elements.nextBtn.classList.remove('disabled');
+    
+    elements.loadingIndicator.style.display = 'none';
+    AppState.isLocked = false;
+    
+    showDebugInfo(`Notes: ${note1.display} → ${note2.display} (${semitoneDistance} semitons, ${direction})`);
+    
+    return true;
+    
+  } catch (error) {
+    console.error('Error generant interval:', error);
+    elements.loadingIndicator.style.display = 'none';
+    showMessage(`Error: ${error.message}`, false);
+    AppState.isLocked = false;
+    return false;
+  }
 }
 
-confirmBtn.addEventListener('click',()=>{
-  if(app.lock) return;
-  app.attempts++;
-  attemptsEl.textContent=app.attempts;
-  const selSem=parseInt(intervalSelect.value);
-  const selDir=dirSelect.value;
-  if(selSem===app.currentSemitones && selDir===app.currentDir){
-    app.correct++;
-    correctEl.textContent=app.correct;
-    showMessage('Correcte!',true);
-  }else{
-    showMessage(`Incorrecte! Era ${INTERVALS.find(i=>i.semitones===app.currentSemitones).name} ${app.currentDir==='asc'?'Ascendent':'Descendent'}`,false);
+// Timer
+function startTimer() {
+  clearInterval(AppState.timer);
+  AppState.timeLeft = CONFIG.START_TIME;
+  updateTimerDisplay();
+  
+  AppState.timer = setInterval(() => {
+    AppState.timeLeft--;
+    updateTimerDisplay();
+    
+    if (AppState.timeLeft <= 0) {
+      clearInterval(AppState.timer);
+      handleTimeout();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  elements.timer.textContent = `${AppState.timeLeft}s`;
+  
+  // Canviar estil segons temps restant
+  elements.timer.className = 'badge';
+  if (AppState.timeLeft <= 5) {
+    elements.timer.classList.add('timer-danger');
+  } else if (AppState.timeLeft <= 10) {
+    elements.timer.classList.add('timer-warning');
+  }
+}
+
+function handleTimeout() {
+  if (AppState.currentPair) {
+    const actualInterval = INTERVALS.find(i => i.semitones === AppState.currentPair.semitones);
+    const directionText = AppState.currentPair.direction === 'asc' ? 'Ascendent' : 'Descendent';
+    showMessage(`⏰ Temps esgotat! Era: ${actualInterval.name} ${directionText}`, false, 3000);
+  } else {
+    showMessage('⏰ Temps esgotat!', false);
+  }
+}
+
+// Event handlers
+function handleConfirm() {
+  if (AppState.isLocked || !AppState.currentPair) return;
+  
+  AppState.attempts++;
+  elements.attempts.textContent = AppState.attempts;
+  
+  const selectedSemitones = parseInt(elements.intervalSelect.value);
+  const selectedDirection = elements.dirSelect.value;
+  
+  const isCorrect = selectedSemitones === AppState.currentPair.semitones && 
+                   selectedDirection === AppState.currentPair.direction;
+  
+  if (isCorrect) {
+    AppState.correct++;
+    elements.correct.textContent = AppState.correct;
+    showMessage('🎉 Correcte!', true);
+  } else {
+    const actualInterval = INTERVALS.find(i => i.semitones === AppState.currentPair.semitones);
+    const directionText = AppState.currentPair.direction === 'asc' ? 'Ascendent' : 'Descendent';
+    showMessage(`❌ Incorrecte! Era: ${actualInterval.emoji} ${actualInterval.name} ${directionText}`, false);
+  }
+  
+  updateAccuracy();
+}
+
+function handleNext() {
+  if (AppState.isLocked) return;
+  
+  const success = generateInterval();
+  if (success) {
+    startTimer();
+  }
+}
+
+function handleStart() {
+  if (!AppState.vexflowLoaded) {
+    showMessage('Esperant VexFlow...', false);
+    return;
+  }
+  
+  AppState.exerciseStarted = true;
+  elements.startBtn.disabled = true;
+  elements.startBtn.classList.add('disabled');
+  elements.startBtn.textContent = 'Exercici en curs...';
+  
+  const success = generateInterval();
+  if (success) {
+    startTimer();
+    showMessage('🎵 Exercici iniciat! Identifica l\'interval mostrat.', true, 1500);
+  } else {
+    // Rehabilitar botó si hi ha error
+    elements.startBtn.disabled = false;
+    elements.startBtn.classList.remove('disabled');
+    elements.startBtn.textContent = 'Inicia Exercici';
+    AppState.exerciseStarted = false;
+  }
+}
+
+// Event listeners
+elements.startBtn.addEventListener('click', handleStart);
+elements.confirmBtn.addEventListener('click', handleConfirm);
+elements.nextBtn.addEventListener('click', handleNext);
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    if (!AppState.exerciseStarted) {
+      handleStart();
+    } else if (!elements.confirmBtn.disabled) {
+      handleConfirm();
+    }
+  } else if (e.key === ' ') {
+    e.preventDefault();
+    if (AppState.exerciseStarted && !elements.nextBtn.disabled) {
+      handleNext();
+    }
   }
 });
 
-nextBtn.addEventListener('click',()=>{
-  if(app.lock) return;
-  nextBtn.textContent='Carregant…';
-  setTimeout(()=>{
-    generateInterval();
-    nextBtn.textContent='Següent';
-  },100);
-});
+// Inicialització
+async function initialize() {
+  try {
+    // Mostrar indicador de càrrega
+    elements.loadingIndicator.style.display = 'block';
+    elements.loadingIndicator.textContent = 'Carregant VexFlow...';
+    
+    // Crear base de dades de notes
+    AppState.notes = createNotesDatabase();
+    console.log(`Notes carregades: ${AppState.notes.length}`);
+    
+    // Construir opcions d'intervals
+    buildIntervalOptions();
+    
+    // Esperar VexFlow
+    await checkVexFlowAvailability();
+    console.log('VexFlow carregat correctament');
+    
+    elements.loadingIndicator.style.display = 'none';
+    elements.timer.textContent = `${CONFIG.START_TIME}s`;
+    
+    showMessage('✅ Tot llest! Prem "Inicia Exercici" per començar.', true, 2000);
+    
+  } catch (error) {
+    console.error('Error inicialitzant:', error);
+    elements.loadingIndicator.style.display = 'none';
+    elements.noVexflow.style.display = 'block';
+    elements.startBtn.disabled = true;
+    elements.startBtn.classList.add('disabled');
+    elements.startBtn.textContent = 'Error de càrrega';
+    showMessage('❌ Error carregant l\'aplicació. Recarrega la pàgina.', false, 5000);
+  }
+}
 
-startBtn.addEventListener('click',()=>{
-  generateInterval();
-  startTimer();
-  startBtn.disabled=true;
-  startBtn.classList.add('disabled');
-});
+// Carregar script de VexFlow i inicialitzar
+const script = document.createElement('script');
+script.src = 'https://unpkg.com/vexflow@4.2.5/build/cjs/vexflow.js';
+script.onload = initialize;
+script.onerror = () => {
+  // Encara que VexFlow falli, els intervals han de mostrar-se
+  buildIntervalOptions();
+  elements.loadingIndicator.style.display = 'none';
+  elements.noVexflow.style.display = 'block';
+  showMessage('❌ Error carregant VexFlow. Comprova la connexió.', false, 5000);
+};
+
+// Inicialitzar intervals immediatament (no depenen de VexFlow)
+buildIntervalOptions();
+
+document.head.appendChild(script);
 </script>
 </body>
 </html>
