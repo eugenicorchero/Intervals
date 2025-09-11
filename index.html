@@ -94,14 +94,14 @@ const INTERVALS = [
   {semitones:12,name:'Octava',tones:'6'}
 ];
 
-// Notes DB amb sostenuts/bemolls
+// Notes DB amb accidentals
 const NOTES = [];
 const noteNames = ['A','B','C','D','E','F','G'];
 const octaves = [3,4,5];
-const semitoneMap = {'C':0,'C#':1,'Db':1,'D':2,'D#':3,'Eb':3,'E':4,'F':5,'F#':6,'Gb':6,'G':7,'G#':8,'Ab':8,'A':9,'A#':10,'Bb':10,'B':11};
+const semitoneMap = {'C':0,'D':2,'E':4,'F':5,'G':7,'A':9,'B':11};
 octaves.forEach(oct=>{
   noteNames.forEach(l=>{
-    const baseSem = 12*(oct+1)+semitoneMap[l]||0;
+    const baseSem = 12*(oct+1)+semitoneMap[l];
     // natural
     NOTES.push({display:`${l}${oct}`,letter:l,acc:null,oct:oct,sem:baseSem});
     // sostingut
@@ -112,7 +112,7 @@ octaves.forEach(oct=>{
 });
 
 // Estat app
-const app={n1:null,n2:null,currentSemitones:null,currentDir:null,attempts:0,correct:0,timer:null,startTime:null,lock:false,pendingLoad:null,lastPairs:[]};
+const app={n1:null,n2:null,currentSemitones:null,currentDir:null,attempts:0,correct:0,timer:null,startTime:null,lock:false,lastPairs:[]};
 
 // UI
 const vfContainer = document.getElementById('vf-container');
@@ -128,42 +128,55 @@ const nextBtn = document.getElementById('nextBtn');
 
 function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function getRandomNote(){return NOTES[randInt(0,NOTES.length-1)];}
-function buildIntervalOptions(){intervalSelect.innerHTML='';INTERVALS.forEach(i=>{const opt=document.createElement('option');opt.value=i.semitones;opt.textContent=`${i.name} (${i.tones} t.)`;intervalSelect.appendChild(opt);});}
+function buildIntervalOptions(){
+  intervalSelect.innerHTML='';
+  INTERVALS.forEach(i=>{
+    const opt=document.createElement('option');
+    opt.value=i.semitones;
+    opt.textContent=`${i.name} (${i.tones} t.)`;
+    intervalSelect.appendChild(opt);
+  });
+}
 buildIntervalOptions();
 
 function generateInterval(){
-  app.lock=true;
-  vfContainer.innerHTML='';
-  const renderer = new VF.Renderer(vfContainer,VF.Renderer.Backends.SVG);
-  renderer.resize(vfContainer.clientWidth,150);
+  app.lock = true;
+  vfContainer.innerHTML = '';
+
+  const renderer = new VF.Renderer(vfContainer, VF.Renderer.Backends.SVG);
+  renderer.resize(vfContainer.clientWidth, 150);
   const context = renderer.getContext();
-  const stave = new VF.Stave(10, 40, vfContainer.clientWidth-20);
+
+  const stave = new VF.Stave(10, 40, vfContainer.clientWidth - 20);
   stave.addClef('treble').setContext(context).draw();
-  let n1,n2;
-  do{
-    n1=getRandomNote();
-    n2=getRandomNote();
-    // evitar repetir últims 3 intervals
-  }while(app.lastPairs.some(p=>p[0]===n1.display && p[1]===n2.display) || Math.abs(n1.sem-n2.sem)>12);
-  app.lastPairs.push([n1.display,n2.display]);
+
+  let n1, n2;
+  do {
+    n1 = getRandomNote();
+    n2 = getRandomNote();
+  } while(app.lastPairs.some(p => p[0]===n1.display && p[1]===n2.display) || Math.abs(n1.sem-n2.sem)>12);
+
+  app.lastPairs.push([n1.display, n2.display]);
   if(app.lastPairs.length>10) app.lastPairs.shift();
-  app.n1=n1; app.n2=n2;
-  app.currentSemitones=Math.abs(n1.sem-n2.sem);
-  app.currentDir=n1.sem<n2.sem?'asc':'desc';
-  const notes=[new VF.StaveNote({keys:[`${n1.letter}${n1.oct}`],[`keys:${n2.letter}${n2.oct}`],duration:'q'})];
-  // Correcció: afegim accidentals
-  const vfNotes=[
-    new VF.StaveNote({keys:[`${n1.letter}${n1.acc||''}/${n1.oct}`],duration:'q'}),
-    new VF.StaveNote({keys:[`${n2.letter}${n2.acc||''}/${n2.oct}`],duration:'q'})
+
+  app.n1 = n1;
+  app.n2 = n2;
+  app.currentSemitones = Math.abs(n1.sem - n2.sem);
+  app.currentDir = n1.sem < n2.sem ? 'asc':'desc';
+
+  // Crear notes
+  const vfNotes = [
+    new VF.StaveNote({ keys: [`${n1.letter}/${n1.oct}`], duration: 'q' }),
+    new VF.StaveNote({ keys: [`${n2.letter}/${n2.oct}`], duration: 'q' })
   ];
-  vfNotes.forEach((note,i)=>{
-    if(note.getKeys()[0].includes('#')) note.addModifier(0,new VF.Accidental('#'));
-    if(note.getKeys()[0].includes('b')) note.addModifier(0,new VF.Accidental('b'));
-  });
-  const voice = new VF.Voice({num_beats:2,beat_value:4});
+  if(n1.acc) vfNotes[0].addModifier(0,new VF.Accidental(n1.acc));
+  if(n2.acc) vfNotes[1].addModifier(0,new VF.Accidental(n2.acc));
+
+  const voice = new VF.Voice({ num_beats:2, beat_value:4 });
   voice.addTickables(vfNotes);
-  new VF.Formatter().joinVoices([voice]).format([voice],vfContainer.clientWidth-60);
-  voice.draw(context,stave);
+  new VF.Formatter().joinVoices([voice]).format([voice], vfContainer.clientWidth-60);
+  voice.draw(context, stave);
+
   app.lock=false;
 }
 
