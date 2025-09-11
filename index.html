@@ -1,407 +1,226 @@
 <!DOCTYPE html>
 <html lang="ca">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Entrenador d’Intervals Musicals — v13+</title>
-  <style>
-    :root{
-      --bg:#0f1114;
-      --card:#181a1d;
-      --panel:#0b0b0c;
-      --text:#e6edf3;
-      --muted:#9aa4ad;
-      --primary:#0A84FF;
-      --primary-hover:#339CFF;
-      --success:#30D158;
-      --danger:#FF453A;
-      --white-note-bg:#ffffff;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,-apple-system,"Helvetica Neue",Arial;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
-    .wrap{max-width:980px;margin:24px auto;padding:20px;}
-    .card{background:var(--card);border-radius:14px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,0.6)}
-    .header{display:flex;align-items:center;justify-content:space-between;gap:12px}
-    h1{margin:0;color:var(--primary);font-size:20px}
-    .lead{margin:6px 0 0 0;color:var(--muted);font-size:13px}
-    #vf-container{border-radius:10px;background:var(--white-note-bg);padding:12px;min-height:170px;display:flex;align-items:center;justify-content:center;margin-top:18px}
-    .controls-wrap{margin-top:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-    .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    select,button{font-size:14px;padding:10px 14px;border-radius:10px;border:none;outline:none}
-    select{min-width:180px;background:#0f1720;color:var(--text)}
-    button.primary{background:var(--primary);color:#fff;cursor:pointer;transition:all .14s;border-radius:10px}
-    button.primary:hover{background:var(--primary-hover)}
-    button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text);cursor:pointer;border-radius:10px}
-    button.disabled{opacity:.45;cursor:not-allowed}
-    .badge{background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:10px;color:var(--muted);font-size:13px}
-    .message{margin-top:12px;padding:12px;border-radius:10px;display:none;font-weight:700;opacity:0;transition:opacity .25s}
-    .ok{background:rgba(48,209,88,0.12);color:var(--success)}
-    .bad{background:rgba(255,69,58,0.08);color:var(--danger)}
-    .meta{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;color:var(--muted);font-size:13px}
-    #startBtn{font-size:15px;padding:12px 18px}
-    @media (max-width:700px){
-      #vf-container{min-height:150px}
-      select{min-width:140px}
-      .controls-wrap{flex-direction:column;align-items:stretch}
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entrenador d’Intervals Musicals</title>
+<style>
+:root{
+  --bg:#0f1114; --card:#181a1d; --panel:#0b0b0c; --text:#e6edf3;
+  --muted:#9aa4ad; --primary:#0A84FF; --primary-hover:#339CFF;
+  --success:#30D158; --danger:#FF453A; --white-note-bg:#ffffff;
+}
+body{margin:0;font-family:Inter,system-ui,-apple-system,"Helvetica Neue",Arial;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+.wrap{max-width:980px;margin:24px auto;padding:20px;}
+.card{background:var(--card);border-radius:14px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,0.6);}
+.header{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+h1{margin:0;color:var(--primary);font-size:20px;}
+.lead{margin:6px 0 0 0;color:var(--muted);font-size:13px;}
+#vf-container{border-radius:10px;background:var(--white-note-bg);padding:12px;min-height:170px;display:flex;align-items:center;justify-content:center;margin-top:18px;}
+.controls-wrap{margin-top:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+select,button{font-size:14px;padding:10px 14px;border-radius:10px;border:none;outline:none;}
+select{min-width:180px;background:#0f1720;color:var(--text);}
+button.primary{background:var(--primary);color:#fff;cursor:pointer;transition:all .14s;border-radius:10px;}
+button.primary:hover{background:var(--primary-hover);}
+button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text);cursor:pointer;border-radius:10px;}
+button.disabled{opacity:.45;cursor:not-allowed;}
+.badge{background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:10px;color:var(--muted);font-size:13px;}
+.message{margin-top:12px;padding:12px;border-radius:10px;display:none;font-weight:700;opacity:0;transition:opacity .25s;}
+.ok{background:rgba(48,209,88,0.12);color:var(--success);}
+.bad{background:rgba(255,69,58,0.08);color:var(--danger);}
+.meta{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;color:var(--muted);font-size:13px;}
+#startBtn{font-size:15px;padding:12px 18px;}
+@media (max-width:700px){
+  #vf-container{min-height:150px}
+  select{min-width:140px}
+  .controls-wrap{flex-direction:column;align-items:stretch}
+}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <div class="header">
-        <div>
-          <h1>Entrenador d’Intervals Musicals</h1>
-          <div class="lead">Rang A3 → G5 · sostenidors i bemolls aleatoris · practica infinitament</div>
-        </div>
-        <div>
-          <button id="startBtn" class="primary">Inicia Exercici</button>
-        </div>
+<div class="wrap">
+  <div class="card">
+    <div class="header">
+      <div>
+        <h1>Entrenador d’Intervals Musicals</h1>
+        <div class="lead">Rang A3 → G5 · accidentals aleatoris · pràctica infinita</div>
       </div>
-
-      <div id="vf-container" aria-hidden="false"></div>
-
-      <div class="controls-wrap">
-        <div class="controls">
-          <select id="intervalSelect" aria-label="Interval"></select>
-          <select id="dirSelect" aria-label="Direcció">
-            <option value="asc">Ascendent</option>
-            <option value="desc">Descendent</option>
-          </select>
-
-          <button id="confirmBtn" class="primary">Confirma</button>
-          <button id="nextBtn" class="ghost">Següent</button>
-        </div>
-
-        <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
-          <div style="font-size:13px;color:var(--muted)">Temps:</div>
-          <div id="timer" class="badge">20s</div>
-        </div>
-      </div>
-
-      <div id="message" class="message"></div>
-
-      <div class="meta">
-        <div>Intents: <span id="attempts" class="badge">0</span></div>
-        <div>Encerts: <span id="correct" class="badge">0</span></div>
+      <div>
+        <button id="startBtn" class="primary">Inicia Exercici</button>
       </div>
     </div>
+    <div id="vf-container"></div>
+    <div class="controls-wrap">
+      <div class="controls">
+        <select id="intervalSelect"></select>
+        <select id="dirSelect">
+          <option value="asc">Ascendent</option>
+          <option value="desc">Descendent</option>
+        </select>
+        <button id="confirmBtn" class="primary">Confirma</button>
+        <button id="nextBtn" class="ghost">Següent</button>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+        <div style="font-size:13px;color:var(--muted)">Temps:</div>
+        <div id="timer" class="badge">20s</div>
+      </div>
+    </div>
+    <div id="message" class="message"></div>
+    <div class="meta">
+      <div>Intents: <span id="attempts" class="badge">0</span></div>
+      <div>Encerts: <span id="correct" class="badge">0</span></div>
+    </div>
   </div>
+</div>
 
-  <!-- VexFlow (cjs build) -->
-  <script src="https://unpkg.com/vexflow@4.2.5/build/cjs/vexflow.js"></script>
-  <script>
-  /* ---------------- v13+ final: base NOTES (A3..G5), rendering robust, timer, lock, UI en cat ---------------- */
+<script src="https://unpkg.com/vexflow@4.2.5/build/cjs/vexflow.js"></script>
+<script>
+const VF = Vex.Flow;
+const START_TIME = 20;
+const INTERVALS = [
+  {semitones:0,name:'Uníson',tones:'0'},
+  {semitones:1,name:'2a menor',tones:'½'},
+  {semitones:2,name:'2a major',tones:'1'},
+  {semitones:3,name:'3a menor',tones:'1½'},
+  {semitones:4,name:'3a major',tones:'2'},
+  {semitones:5,name:'4a justa',tones:'2½'},
+  {semitones:6,name:'Tritó',tones:'3'},
+  {semitones:7,name:'5a justa',tones:'3½'},
+  {semitones:8,name:'6a menor',tones:'4'},
+  {semitones:9,name:'6a major',tones:'4½'},
+  {semitones:10,name:'7a menor',tones:'5'},
+  {semitones:11,name:'7a major',tones:'5½'},
+  {semitones:12,name:'Octava',tones:'6'}
+];
 
-  const VF = Vex.Flow;
+// Notes DB amb sostenuts/bemolls
+const NOTES = [];
+const noteNames = ['A','B','C','D','E','F','G'];
+const octaves = [3,4,5];
+const semitoneMap = {'C':0,'C#':1,'Db':1,'D':2,'D#':3,'Eb':3,'E':4,'F':5,'F#':6,'Gb':6,'G':7,'G#':8,'Ab':8,'A':9,'A#':10,'Bb':10,'B':11};
+octaves.forEach(oct=>{
+  noteNames.forEach(l=>{
+    const baseSem = 12*(oct+1)+semitoneMap[l]||0;
+    // natural
+    NOTES.push({display:`${l}${oct}`,letter:l,acc:null,oct:oct,sem:baseSem});
+    // sostingut
+    if(l!=='E' && l!=='B') NOTES.push({display:`${l}#${oct}`,letter:l,acc:'#',oct:oct,sem:baseSem+1});
+    // bemoll
+    if(l!=='C' && l!=='F') NOTES.push({display:`${l}b${oct}`,letter:l,acc:'b',oct:oct,sem:baseSem-1});
+  });
+});
 
-  // Config
-  const START_TIME = 20;
+// Estat app
+const app={n1:null,n2:null,currentSemitones:null,currentDir:null,attempts:0,correct:0,timer:null,startTime:null,lock:false,pendingLoad:null,lastPairs:[]};
 
-  // INTERVALS (català, tons visibles)
-  const INTERVALS = [
-    {semitones:0,name:'Uníson',tones:'0'},
-    {semitones:1,name:'2a menor',tones:'½'},
-    {semitones:2,name:'2a major',tones:'1'},
-    {semitones:3,name:'3a menor',tones:'1½'},
-    {semitones:4,name:'3a major',tones:'2'},
-    {semitones:5,name:'4a justa',tones:'2½'},
-    {semitones:6,name:'Tritó',tones:'3'},
-    {semitones:7,name:'5a justa',tones:'3½'},
-    {semitones:8,name:'6a menor',tones:'4'},
-    {semitones:9,name:'6a major',tones:'4½'},
-    {semitones:10,name:'7a menor',tones:'5'},
-    {semitones:11,name:'7a major',tones:'5½'},
-    {semitones:12,name:'Octava',tones:'6'}
+// UI
+const vfContainer = document.getElementById('vf-container');
+const intervalSelect = document.getElementById('intervalSelect');
+const dirSelect = document.getElementById('dirSelect');
+const timerEl = document.getElementById('timer');
+const messageEl = document.getElementById('message');
+const attemptsEl = document.getElementById('attempts');
+const correctEl = document.getElementById('correct');
+const startBtn = document.getElementById('startBtn');
+const confirmBtn = document.getElementById('confirmBtn');
+const nextBtn = document.getElementById('nextBtn');
+
+function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function getRandomNote(){return NOTES[randInt(0,NOTES.length-1)];}
+function buildIntervalOptions(){intervalSelect.innerHTML='';INTERVALS.forEach(i=>{const opt=document.createElement('option');opt.value=i.semitones;opt.textContent=`${i.name} (${i.tones} t.)`;intervalSelect.appendChild(opt);});}
+buildIntervalOptions();
+
+function generateInterval(){
+  app.lock=true;
+  vfContainer.innerHTML='';
+  const renderer = new VF.Renderer(vfContainer,VF.Renderer.Backends.SVG);
+  renderer.resize(vfContainer.clientWidth,150);
+  const context = renderer.getContext();
+  const stave = new VF.Stave(10, 40, vfContainer.clientWidth-20);
+  stave.addClef('treble').setContext(context).draw();
+  let n1,n2;
+  do{
+    n1=getRandomNote();
+    n2=getRandomNote();
+    // evitar repetir últims 3 intervals
+  }while(app.lastPairs.some(p=>p[0]===n1.display && p[1]===n2.display) || Math.abs(n1.sem-n2.sem)>12);
+  app.lastPairs.push([n1.display,n2.display]);
+  if(app.lastPairs.length>10) app.lastPairs.shift();
+  app.n1=n1; app.n2=n2;
+  app.currentSemitones=Math.abs(n1.sem-n2.sem);
+  app.currentDir=n1.sem<n2.sem?'asc':'desc';
+  const notes=[new VF.StaveNote({keys:[`${n1.letter}${n1.oct}`],[`keys:${n2.letter}${n2.oct}`],duration:'q'})];
+  // Correcció: afegim accidentals
+  const vfNotes=[
+    new VF.StaveNote({keys:[`${n1.letter}${n1.acc||''}/${n1.oct}`],duration:'q'}),
+    new VF.StaveNote({keys:[`${n2.letter}${n2.acc||''}/${n2.oct}`],duration:'q'})
   ];
-
-  // NOTES DB: A3 (57) .. G5 (79) values: semitone numbers relative to MIDI mapping used previously.
-  // We'll store semitone as absolute number for comparisons (consistent with earlier code).
-  // Note: sem values chosen to be continuous and match previous MIN/MAX used (57..79).
-  const NOTES = [
-    {display:'A3', letter:'A', acc:null, oct:3, sem:57},
-    {display:'A#3', letter:'A', acc:'#', oct:3, sem:58},
-    {display:'Bb3', letter:'B', acc:'b', oct:3, sem:58},
-    {display:'B3', letter:'B', acc:null, oct:3, sem:59},
-    {display:'C4', letter:'C', acc:null, oct:4, sem:60},
-    {display:'C#4', letter:'C', acc:'#', oct:4, sem:61},
-    {display:'Db4', letter:'D', acc:'b', oct:4, sem:61},
-    {display:'D4', letter:'D', acc:null, oct:4, sem:62},
-    {display:'D#4', letter:'D', acc:'#', oct:4, sem:63},
-    {display:'Eb4', letter:'E', acc:'b', oct:4, sem:63},
-    {display:'E4', letter:'E', acc:null, oct:4, sem:64},
-    {display:'F4', letter:'F', acc:null, oct:4, sem:65},
-    {display:'F#4', letter:'F', acc:'#', oct:4, sem:66},
-    {display:'Gb4', letter:'G', acc:'b', oct:4, sem:66},
-    {display:'G4', letter:'G', acc:null, oct:4, sem:67},
-    {display:'G#4', letter:'G', acc:'#', oct:4, sem:68},
-    {display:'Ab4', letter:'A', acc:'b', oct:4, sem:68},
-    {display:'A4', letter:'A', acc:null, oct:4, sem:69},
-    {display:'A#4', letter:'A', acc:'#', oct:4, sem:70},
-    {display:'Bb4', letter:'B', acc:'b', oct:4, sem:70},
-    {display:'B4', letter:'B', acc:null, oct:4, sem:71},
-    {display:'C5', letter:'C', acc:null, oct:5, sem:72},
-    {display:'C#5', letter:'C', acc:'#', oct:5, sem:73},
-    {display:'Db5', letter:'D', acc:'b', oct:5, sem:73},
-    {display:'D5', letter:'D', acc:null, oct:5, sem:74},
-    {display:'D#5', letter:'D', acc:'#', oct:5, sem:75},
-    {display:'Eb5', letter:'E', acc:'b', oct:5, sem:75},
-    {display:'E5', letter:'E', acc:null, oct:5, sem:76},
-    {display:'F5', letter:'F', acc:null, oct:5, sem:77},
-    {display:'F#5', letter:'F', acc:'#', oct:5, sem:78},
-    {display:'Gb5', letter:'G', acc:'b', oct:5, sem:78},
-    {display:'G5', letter:'G', acc:null, oct:5, sem:79}
-  ];
-
-  // Application state
-  const app = {
-    n1: null,
-    n2: null,
-    currentSemitones: null,
-    currentDir: null,
-    attempts: 0,
-    correct: 0,
-    timer: null,
-    startTime: null,
-    lock: false,
-    pendingLoad: null,
-    lastPairs: []
-  };
-
-  // UI refs
-  const vfContainer = document.getElementById('vf-container');
-  const intervalSelect = document.getElementById('intervalSelect');
-  const dirSelect = document.getElementById('dirSelect');
-  const timerEl = document.getElementById('timer');
-  const messageEl = document.getElementById('message');
-  const attemptsEl = document.getElementById('attempts');
-  const correctEl = document.getElementById('correct');
-  const startBtn = document.getElementById('startBtn');
-  const confirmBtn = document.getElementById('confirmBtn');
-  const nextBtn = document.getElementById('nextBtn');
-
-  /* ---------- helpers ---------- */
-  function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
-  function getRandomNoteEntry(){ return NOTES[randInt(0, NOTES.length-1)]; }
-
-  /* ---------- build interval dropdown ---------- */
-  function buildIntervalOptions(){
-    intervalSelect.innerHTML = '';
-    INTERVALS.forEach(i=>{
-      const opt = document.createElement('option');
-      opt.value = i.semitones;
-      opt.textContent = `${i.name} (${i.tones} tons)`;
-      intervalSelect.appendChild(opt);
-    });
-  }
-
-  /* ---------- generate interval from DB ---------- */
-  function generateInterval(){
-    let attempts = 0;
-    let n1, n2, diff;
-    do {
-      n1 = getRandomNoteEntry();
-      n2 = getRandomNoteEntry();
-      diff = Math.abs(n2.sem - n1.sem);
-      attempts++;
-      if (attempts > 300) break; // fallback
-    } while (diff > 12 || app.lastPairs.includes(`${n1.display}|${n2.display}`));
-
-    app.lastPairs.push(`${n1.display}|${n2.display}`);
-    if (app.lastPairs.length > 14) app.lastPairs.shift();
-
-    const dir = (n2.sem > n1.sem) ? 'asc' : (n2.sem < n1.sem ? 'desc' : 'asc');
-    return { n1, n2, semitones: diff, dir };
-  }
-
-  /* ---------- render interval (create renderer cleanly each time) ---------- */
-  function renderIntervalObject(interval){
-    // clean container
-    vfContainer.innerHTML = '';
-
-    // create renderer sized to container width
-    const width = Math.min(820, Math.max(420, vfContainer.clientWidth));
-    const renderer = new VF.Renderer(vfContainer, VF.Renderer.Backends.SVG);
-    renderer.resize(width, 200);
-    const context = renderer.getContext();
-
-    // stave
-    const stave = new VF.Stave(10, 40, width - 20);
-    stave.addClef('treble').setContext(context).draw();
-
-    // helper to create stave note from entry
-    function staveNoteFromEntry(entry){
-      // key must be lower-case letter + '/' + octave
-      const key = `${entry.letter.toLowerCase()}/${entry.oct}`;
-      const note = new VF.StaveNote({ clef:'treble', keys:[key], duration:'q' });
-      if (entry.acc) {
-        // apply accidental (use addAccidental for correctness)
-        note.addAccidental(0, new VF.Accidental(entry.acc));
-      }
-      return note;
-    }
-
-    const note1 = staveNoteFromEntry(interval.n1);
-    const note2 = staveNoteFromEntry(interval.n2);
-
-    const voice = new VF.Voice({ num_beats: 2, beat_value: 4 });
-    voice.addTickables([note1, note2]);
-
-    new VF.Formatter().joinVoices([voice]).format([voice], width - 120);
-    voice.draw(context, stave);
-
-    // save state values for validation
-    app.n1 = interval.n1;
-    app.n2 = interval.n2;
-    app.currentSemitones = interval.semitones;
-    app.currentDir = interval.dir;
-  }
-
-  /* ---------- scheduling + lock helpers ---------- */
-  function clearPendingLoad(){
-    if (app.pendingLoad) { clearTimeout(app.pendingLoad); app.pendingLoad = null; }
-  }
-  function scheduleLoad(ms = 0){
-    clearPendingLoad();
-    app.pendingLoad = setTimeout(()=>{
-      app.pendingLoad = null;
-      loadQuestion();
-    }, ms);
-  }
-
-  /* ---------- load question (central function, protected by lock) ---------- */
-  function loadQuestion(){
-    if (app.lock) return;
-    app.lock = true;
-    try {
-      // cleanup
-      clearTimer();
-      clearPendingLoad();
-
-      // generate and render
-      const interval = generateInterval();
-      renderIntervalObject(interval);
-
-      // UI reset
-      hideMessage();
-      intervalSelect.selectedIndex = 0;
-      dirSelect.value = 'asc';
-
-      // start timer
-      app.startTime = Date.now();
-      updateTimerDisplay(START_TIME);
-      startTimer();
-
-    } finally {
-      // small delay before releasing lock to avoid re-entrancy
-      setTimeout(()=>{ app.lock = false; }, 60);
-    }
-  }
-
-  /* ---------- Timer (Date.now based) ---------- */
-  function updateTimerDisplay(rem){
-    timerEl.textContent = rem + 's';
-    timerEl.style.background = rem <= 5 ? 'var(--danger)' : 'transparent';
-  }
-  function startTimer(){
-    clearTimer();
-    app.timer = setInterval(()=>{
-      const rem = Math.max(0, START_TIME - Math.floor((Date.now() - app.startTime)/1000));
-      updateTimerDisplay(rem);
-      if (rem <= 0) {
-        clearTimer();
-        onTimeUp();
-      }
-    }, 120);
-  }
-  function clearTimer(){ if (app.timer){ clearInterval(app.timer); app.timer = null; } }
-
-  /* ---------- validate answer ---------- */
-  function evaluateAnswer(){
-    if (app.lock) return;
-    app.lock = true;
-    try {
-      clearPendingLoad();
-      clearTimer();
-
-      const selS = parseInt(intervalSelect.value, 10);
-      const selDir = dirSelect.value;
-      const diff = app.n2.sem - app.n1.sem;
-      const semAbs = Math.abs(diff);
-      const dir = diff > 0 ? 'asc' : (diff < 0 ? 'desc' : 'asc');
-
-      app.attempts++;
-      attemptsEl.textContent = app.attempts;
-
-      const correctSem = selS === semAbs;
-      const correctDir = semAbs === 0 ? true : (selDir === dir);
-
-      if (correctSem && correctDir) {
-        app.correct++;
-        correctEl.textContent = app.correct;
-        showMessage('Correcte!', true);
-        confirmBtn.style.background = 'var(--success)';
-        scheduleLoad(600);
-      } else {
-        showMessage(`Incorrecte. Correcte: ${INTERVALS[semAbs].name} (${INTERVALS[semAbs].tones} tons), ${dir === 'asc' ? 'ascendent' : 'descendent'}`, false);
-        confirmBtn.style.background = 'var(--danger)';
-        setTimeout(()=>{ confirmBtn.style.background = ''; }, 550);
-        scheduleLoad(1500);
-      }
-    } finally {
-      setTimeout(()=>{ app.lock = false; }, 80);
-    }
-  }
-
-  /* ---------- time up ---------- */
-  function onTimeUp(){
-    const diff = app.n2.sem - app.n1.sem;
-    const semAbs = Math.abs(diff);
-    const dir = diff > 0 ? 'asc' : (diff < 0 ? 'desc' : 'asc');
-    app.attempts++;
-    attemptsEl.textContent = app.attempts;
-    showMessage(`S'ha acabat el temps. Correcte: ${INTERVALS[semAbs].name} (${INTERVALS[semAbs].tones} tons), ${dir === 'asc' ? 'ascendent' : 'descendent'}`, false);
-    scheduleLoad(1500);
-  }
-
-  /* ---------- UI messaging ---------- */
-  function showMessage(txt, ok=true){
-    messageEl.textContent = txt;
-    messageEl.className = 'message ' + (ok ? 'ok' : 'bad');
-    messageEl.style.display = 'block';
-    setTimeout(()=>{ messageEl.style.opacity = 1; }, 20);
-    setTimeout(()=>{ messageEl.style.opacity = 0; setTimeout(()=>{ messageEl.style.display = 'none'; }, 300); }, 2200);
-  }
-  function hideMessage(){ messageEl.style.opacity = 0; messageEl.style.display = 'none'; }
-
-  /* ---------- events ---------- */
-  buildIntervalOptions();
-
-  confirmBtn.addEventListener('click', ()=> evaluateAnswer());
-  nextBtn.addEventListener('click', ()=>{
-    if (app.lock) return;
-    clearPendingLoad();
-    clearTimer();
-    loadQuestion();
+  vfNotes.forEach((note,i)=>{
+    if(note.getKeys()[0].includes('#')) note.addModifier(0,new VF.Accidental('#'));
+    if(note.getKeys()[0].includes('b')) note.addModifier(0,new VF.Accidental('b'));
   });
-  startBtn.addEventListener('click', ()=>{
-    startBtn.classList.add('disabled');
-    startBtn.disabled = true;
-    loadQuestion();
-  });
+  const voice = new VF.Voice({num_beats:2,beat_value:4});
+  voice.addTickables(vfNotes);
+  new VF.Formatter().joinVoices([voice]).format([voice],vfContainer.clientWidth-60);
+  voice.draw(context,stave);
+  app.lock=false;
+}
 
-  /* ---------- window resize: re-render current interval clean (if any) ---------- */
-  window.addEventListener('resize', ()=>{
-    if (!app.lock && app.n1 && app.n2) {
-      try {
-        renderIntervalObject({ n1: app.n1, n2: app.n2, semitones: app.currentSemitones, dir: app.currentDir });
-      } catch(e){ /* ignore render resize errors */ }
+function startTimer(){
+  clearInterval(app.timer);
+  app.startTime=START_TIME;
+  timerEl.textContent=`${START_TIME}s`;
+  app.timer=setInterval(()=>{
+    app.startTime--;
+    if(app.startTime<=0){
+      clearInterval(app.timer);
+      timerEl.textContent='0s';
+      showMessage('Temps esgotat!',false);
+    }else{
+      timerEl.textContent=`${app.startTime}s`;
     }
-  });
+  },1000);
+}
 
-  /* ---------- initial state ---------- */
-  // Show interval options now
-  // Note: we do not auto-start; user presses "Inicia Exercici"
-  </script>
+function showMessage(txt,ok){
+  messageEl.textContent=txt;
+  messageEl.className='message '+(ok?'ok':'bad');
+  messageEl.style.display='block';
+  setTimeout(()=>{messageEl.style.opacity=1;},10);
+  setTimeout(()=>{messageEl.style.opacity=0;},1800);
+}
+
+confirmBtn.addEventListener('click',()=>{
+  if(app.lock) return;
+  app.attempts++;
+  attemptsEl.textContent=app.attempts;
+  const selSem=parseInt(intervalSelect.value);
+  const selDir=dirSelect.value;
+  if(selSem===app.currentSemitones && selDir===app.currentDir){
+    app.correct++;
+    correctEl.textContent=app.correct;
+    showMessage('Correcte!',true);
+  }else{
+    showMessage(`Incorrecte! Era ${INTERVALS.find(i=>i.semitones===app.currentSemitones).name} ${app.currentDir==='asc'?'Ascendent':'Descendent'}`,false);
+  }
+});
+
+nextBtn.addEventListener('click',()=>{
+  if(app.lock) return;
+  nextBtn.textContent='Carregant…';
+  setTimeout(()=>{
+    generateInterval();
+    nextBtn.textContent='Següent';
+  },100);
+});
+
+startBtn.addEventListener('click',()=>{
+  generateInterval();
+  startTimer();
+  startBtn.disabled=true;
+  startBtn.classList.add('disabled');
+});
+</script>
 </body>
 </html>
